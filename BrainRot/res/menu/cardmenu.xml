@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/action_setranking"
+	    android:title="@string/action_setranking" />
+    <item android:id="@+id/action_editcard"
+	    android:title="@string/action_editcard" />
+    <item android:id="@+id/action_deletecard"
+	    android:title="@string/action_deletecard" />
+    <item android:id="@+id/action_showstats"
+	    android:title="@string/action_showstats" />
+</menu>

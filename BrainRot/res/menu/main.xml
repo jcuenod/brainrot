@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/action_search"
+		android:title="@string/action_search" />
+    <item android:id="@+id/action_cardhistory"
+       	android:title="@string/action_cardhistory" />
+	<item android:id="@+id/action_previouscard"
+	    android:title="@string/action_previouscard" />
+	<item android:id="@+id/action_nextdue"
+	    android:title="@string/action_nextdue" />
+    	    
+	<item android:id="@+id/action_settings"
+        android:title="@string/action_settings">
+    	<menu>
+    		<item android:id="@+id/action_learnnew"
+	        	android:title="@string/action_learnnew" android:checkable="true" android:checked="true"/>
+    		<item android:id="@+id/action_import"
+	        	android:title="@string/action_import" />
+    		<item android:id="@+id/action_export"
+	        	android:title="@string/action_export" />
+    		<item android:id="@+id/action_emptydb"
+	        	android:title="@string/action_emptydb" />
+    	</menu>
+    </item>
+
+</menu>
