@@ -131,9 +131,15 @@ public class MainActivity extends Activity {
 
 	public void showCardMenu() {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		String [] menuoptions = {"Set Ranking", "Edit Card", "Delete Card", "Show Stats"};
+		String [] menuoptions = {"Card Stats", "Set Ranking", "Edit Card", "Delete Card"};
 		Response [] r = new Response[4];
 		r[0] = new Response() {
+			public void respond(int which) //Show Stats
+			{
+				Toast.makeText(getApplicationContext(), "Individual card stats not yet implemented", Toast.LENGTH_SHORT).show();
+			}
+		};
+		r[1] = new Response() {
 				public void respond(int which) //Set Ranking
 				{
 					String [] timings = new String[FlashCard.PIMSLEUR_TIMINGS.length -1];  
@@ -154,24 +160,17 @@ public class MainActivity extends Activity {
     	   			build_dialog("Set Rank", timings, r);
 				}
 			};
-		r[1] = new Response() {
+		r[2] = new Response() {
 				public void respond(int which) //Edit Card
 				{
 					Toast.makeText(getApplicationContext(), "Edit Card not yet implemented", Toast.LENGTH_SHORT).show();
 				}
 			};
-		r[2] = new Response() {
+		r[3] = new Response() {
 				public void respond(int which) //Delete Card
 				{
 					db.deleteCard(currentCard.getCardId());
 					showCard();
-				}
-			};
-		r[3] = new Response() {
-				public void respond(int which) //Show Stats
-				{
-					Intent statintent = new Intent(getApplicationContext(), Statistics.class);
-				    startActivity(statintent);  
 				}
 			};
 			
@@ -203,8 +202,9 @@ public class MainActivity extends Activity {
 	   			};
 	   			build_dialog("Card History", previousCards, r);
         		return true;
-        	case R.id.action_previouscard:
-        		Toast.makeText(this, "Previous Card not yet implemented...", Toast.LENGTH_SHORT).show();
+        	case R.id.action_statistics:
+				Intent statintent = new Intent(getApplicationContext(), Statistics.class);
+			    startActivity(statintent);
         		return true;
         	case R.id.action_nextdue:
         		DateFormat formatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");

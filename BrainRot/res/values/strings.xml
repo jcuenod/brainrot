@@ -6,7 +6,7 @@
     
     <string name="action_search">Search</string>
     <string name="action_cardhistory">Card History</string>
-    <string name="action_previouscard">Previous Card</string>
+    <string name="action_statistics">Statistics</string>
     <string name="action_nextdue">Next Due</string>
     <string name="action_settings">Settings</string>
     
