@@ -169,8 +169,19 @@ public class MainActivity extends Activity {
 		r[3] = new Response() {
 				public void respond(int which) //Delete Card
 				{
-					db.deleteCard(currentCard.getCardId());
-					showCard();
+					AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+					builder.setTitle("Confirm");
+					builder.setMessage("Do you really want to delete this card?");
+					builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							db.deleteCard(currentCard.getCardId());
+							Log.v(LOG_TAG, "card deleted");
+							showCard();
+						}
+					});
+					builder.setNegativeButton("No", null);
+					builder.create();
+					builder.show();
 				}
 			};
 			
