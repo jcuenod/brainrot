@@ -5,6 +5,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Map;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -15,8 +16,10 @@ import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.DataSetObserver;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,10 +29,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
-
 import bin.classes.com.ipaulpro.afilechooser.utils.*;
 
 public class MainActivity extends Activity {
@@ -44,10 +49,17 @@ public class MainActivity extends Activity {
 	protected FlashCard currentCard;
 	protected DBHelper db;
 	protected boolean learnNew;
+	private Typeface unicodeface;
 
 	private ArrayList<FlashCard> cardHistory;
 	
 	public static boolean isInForeground = false;
+	
+	class DialogData
+	{
+		String title;
+		Map<String, Response> options;
+	}
 	
 	interface Response
 	{
@@ -86,6 +98,8 @@ public class MainActivity extends Activity {
 		 * - stats
 		 * */
 		super.onCreate(savedInstanceState);
+		
+		unicodeface = Typeface.createFromAsset(this.getAssets(), "fonts/FreeSerif.otf");
 
 		setupAlarmStuff();
 		setContentView(R.layout.activity_main);
@@ -207,7 +221,7 @@ public class MainActivity extends Activity {
         		Log.v(LOG_TAG, "here we go: 0-" + cardHistory.size());
         		for (int i = 0; i < cardHistory.size(); i++)
         		{
-        			previousCards[i] = String.valueOf(i) + ": " + cardHistory.get(i).getSideOne();
+        			previousCards[i] = String.valueOf(i + 1) + ": " + cardHistory.get(i).getSideOne();
         		}
         		Response [] r = new Response[1];
         		r[0] = new Response() {
@@ -216,7 +230,7 @@ public class MainActivity extends Activity {
 	   					do_previousCard(which);
 	   				}
 	   			};
-	   			build_dialog("Card History", previousCards, r);
+	   			build_dialog("Card History", previousCards, r, true);
         		return true;
         	case R.id.action_statistics:
 				Intent statintent = new Intent(getApplicationContext(), Statistics.class);
@@ -481,23 +495,18 @@ public class MainActivity extends Activity {
 			((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancelAll();
 		}
 	}
-	
+
 	private void build_dialog(String title, String [] options, Response [] responses)
+	{
+		build_dialog(title, options, responses, false);
+	}
+	private void build_dialog(String title, String [] options, Response [] responses, boolean needUnicode)
 	{
 		final Response[] responses_g = responses;
 		Log.v(LOG_TAG, "AlertDialog options: " + options.toString());
 				
 		AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-		builder.setTitle(title);
-/*		builder.setAdapter(new FontifyArrayAdapter(this, R.layout.statistics, R.id.textview_unidlg, options), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-				Log.v(LOG_TAG, "AlertDialog option: which=" + which);
-				responses_g[responses_g.length > 1 ? which : 0].respond(which);
-
-            }
-        });*/
-			
+		builder.setTitle(title);			
 		builder.setItems(options, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				Log.v(LOG_TAG, "AlertDialog option: which=" + which);
@@ -505,24 +514,89 @@ public class MainActivity extends Activity {
 			}
 		});
 		builder.setInverseBackgroundForced(true);
-		builder.create();		
-		builder.show();
-		
-//		TextView tv = (TextView) findViewById(R.id.textview_unidlg);
-//		Log.v(LOG_TAG, "face:" + face.toString());
-//		Log.v(LOG_TAG, "tv:" + tv.toString());
-//		tv.setTypeface(face);
-		
-		
-//		AlertDialog thedialog = 
-//		
-//		ListView lv = (ListView) thedialog.findViewById(android.R.id.text1);
-//		Typeface face = Typeface.createFromAsset(getAssets(), "fonts/FreeSerif.otf");
-//		for (int i = 0; i < options.length; i++)
-//		{
-//			TextView tv = (TextView) lv.getItemAtPosition(i);
-//			tv.setTypeface(face);
-//		}
+		AlertDialog al = builder.create();
+		if (needUnicode)
+		{
+			al.setOnShowListener(new OnShowListener() {
+
+	            @Override
+	            public void onShow(DialogInterface alert) {
+	                ListView listView = ((AlertDialog)alert).getListView();
+	                final ListAdapter originalAdapter = listView.getAdapter();
+
+	                listView.setAdapter(new ListAdapter()
+	                {
+
+	                    @Override
+	                    public int getCount() {
+	                        return originalAdapter.getCount();
+	                    }
+
+	                    @Override
+	                    public Object getItem(int id) {
+	                        return originalAdapter.getItem(id);
+	                    }
+
+	                    @Override
+	                    public long getItemId(int id) {
+	                        return originalAdapter.getItemId(id);
+	                    }
+
+	                    @Override
+	                    public int getItemViewType(int id) {
+	                        return originalAdapter.getItemViewType(id);
+	                    }
+
+	                    @Override
+	                    public View getView(int position, View convertView, ViewGroup parent) {
+	                        View view = originalAdapter.getView(position, convertView, parent);
+	                        TextView textView = (TextView)view;
+	                        textView.setTypeface(unicodeface);
+	                        return view;
+	                    }
+
+	                    @Override
+	                    public int getViewTypeCount() {
+	                        return originalAdapter.getViewTypeCount();
+	                    }
+
+	                    @Override
+	                    public boolean hasStableIds() {
+	                        return originalAdapter.hasStableIds();
+	                    }
+
+	                    @Override
+	                    public boolean isEmpty() {
+	                        return originalAdapter.isEmpty();
+	                    }
+
+	                    @Override
+	                    public void registerDataSetObserver(DataSetObserver observer) {
+	                        originalAdapter.registerDataSetObserver(observer);
+
+	                    }
+
+	                    @Override
+	                    public void unregisterDataSetObserver(DataSetObserver observer) {
+	                        originalAdapter.unregisterDataSetObserver(observer);
+
+	                    }
+
+	                    @Override
+	                    public boolean areAllItemsEnabled() {
+	                        return originalAdapter.areAllItemsEnabled();
+	                    }
+
+	                    @Override
+	                    public boolean isEnabled(int position) {
+	                        return originalAdapter.isEnabled(position);
+	                    }
+	                });
+	            }
+
+	        });
+		}
+		al.show();
 	}
 	
 	public static PendingIntent getSyncPendingIntent(Context context)
