@@ -70,18 +70,14 @@ public class MainActivity extends Activity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		//TODO: manual set ranking
 		//TODO: onboot - restore alarm (or just show notification)
-		//TODO: retain mode vs expand mode (newcards: true or false) "Learn new words [checkbox]"
 		//TODO: revise mode vs test mode {i.e. just go over the due cards and exit or let me practice everything}
 		//TODO: make promotion dependent on time gap allocation (so that I don't see one card 30 times in a morning and never see it for two years)
 		//TODO: stats (graph showing [display_count || group by word(count)] & [ranking{from 0?} || group by word(count)] & [due date || word(count)] & single word stats
 		//TODO: show number of words overdue (before notification goes away)
-		//TODO: splash screen that prevents user error when no cards (or cards imported)
-		//TODO: mp3 ping notification (ala sms)
-		//TODO: previous card (history)
 		//TODO: support packs
 		//TODO: search cards (either side)
+		//TODO: fix font for unicode menus
 		/*
 		 * currentCard menu:
 		 * - set ranking
@@ -93,7 +89,14 @@ public class MainActivity extends Activity {
 
 		setupAlarmStuff();
 		setContentView(R.layout.activity_main);
-		View.OnLongClickListener vonclick = new View.OnLongClickListener() {
+		View.OnClickListener vortclick = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				do_flip(arg0);
+			}
+		};
+		View.OnLongClickListener vlongclick = new View.OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View view)
 			{
@@ -105,10 +108,12 @@ public class MainActivity extends Activity {
 		TextView text;
 		text = (TextView) findViewById(R.id.txt_sideone);
 		text.setTypeface(tf);
-		text.setOnLongClickListener(vonclick);
+		text.setOnClickListener(vortclick);
+		text.setOnLongClickListener(vlongclick);
 		text = (TextView) findViewById(R.id.txt_sidetwo);
 		text.setTypeface(tf);
-		text.setOnLongClickListener(vonclick);
+		text.setOnLongClickListener(vlongclick);
+		text.setOnClickListener(vortclick);
 		
 		SharedPreferences app_preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		learnNew = app_preferences.getBoolean("learnNew", false);
@@ -466,7 +471,6 @@ public class MainActivity extends Activity {
 		{
 			f += " :: " + j;
 		}
-		Log.v(LOG_TAG, "timings" + f);
 		currentCard.setNextDue(System.currentTimeMillis() + FlashCard.PIMSLEUR_TIMINGS[currentCard.getRanking()]);
 		db.storeCard(currentCard);
 		//alarmManager.cancel(getSyncPendingIntent(this));
