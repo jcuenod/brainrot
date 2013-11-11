@@ -6,11 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import com.ipaulpro.afilechooser.utils.FileUtils;
-
-import android.net.Uri;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -23,6 +18,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.net.Uri;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -31,12 +29,13 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
-import jcuenod.brainrot.R;
+
+import bin.classes.com.ipaulpro.afilechooser.utils.*;
 
 public class MainActivity extends Activity {
 	private static final String LOG_TAG = "BrainRot Main";
 	private static final int FILECHOOSER_REQUEST_IMPORT_CODE = 1;
-	private static final int FILECHOOSER_REQUEST_BACKUPRESTORE_CODE = 1;
+	private static final int FILECHOOSER_REQUEST_BACKUPRESTORE_CODE = 2;
 	private static final int ALARM_REQUEST_CODE = 2;
 	public static final String FROM_NOTIFICATION = "fromnotification";
 
@@ -255,6 +254,10 @@ public class MainActivity extends Activity {
 						}
 					}
 				}
+				break;
+			case FILECHOOSER_REQUEST_BACKUPRESTORE_CODE:
+				Toast.makeText(this, "weird - check logcat, shouldn't have made it here. What were you doing?", Toast.LENGTH_SHORT).show();
+				Log.i(LOG_TAG, "Shouldn't have made it here (FILECHOOSER_REQUEST_BACKUPRESTORE_CODE)");
 				break;
 		}
 		super.onActivityResult(requestCode, resultCode, data);
