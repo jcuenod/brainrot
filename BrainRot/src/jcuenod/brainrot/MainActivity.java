@@ -23,6 +23,7 @@ import android.database.DataSetObserver;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
@@ -237,7 +238,7 @@ public class MainActivity extends Activity {
 			    startActivity(statintent);
         		return true;
         	case R.id.action_nextdue:
-        		DateFormat formatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
+        		DateFormat formatter = SimpleDateFormat.getDateTimeInstance();//new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
         		// Create a calendar object that will convert the date and time value in milliseconds to date.
         		Calendar calendar = Calendar.getInstance();
         		calendar.setTimeInMillis(db.getSoonestDueMilliseconds());
@@ -360,7 +361,6 @@ public class MainActivity extends Activity {
 		//TODO: if type = .db then it's a restore not an import...??
 		Log.v(LOG_TAG, "continuing import with " + file.toString() + "...");
 		
-		ArrayList<FlashCard> result;
 		try
 		{
 			ImportAsyncTask task = new ImportAsyncTask(this);
@@ -374,13 +374,14 @@ public class MainActivity extends Activity {
 	}
 	public void do_backup()
 	{
-		if (db.backupRestoreDB(new File("/sdcard/")))
+		if (db.backupRestoreDB(new File(Environment.getExternalStorageDirectory().getPath())))
 		{
     		Toast.makeText(this, "Database successfully backed up to /sdcard/brainrot-bck-xxxx.db", Toast.LENGTH_SHORT).show();
 		}
 		else
 		{
     		Toast.makeText(this, "Sorry, something went wrong with the backup.\nTry checking Logcat", Toast.LENGTH_SHORT).show();
+    		Log.e(LOG_TAG, "something went wrong with the backup (return value=false)");
 		}
 	}
 	public void do_delete()
@@ -480,11 +481,6 @@ public class MainActivity extends Activity {
 		Log.v(LOG_TAG, "Card: '" + currentCard.getSideOne() + "' promoted to rank " + currentCard.getRanking());
 		currentCard.incrementDisplayCount();
 		currentCard.setLastSeen(System.currentTimeMillis());
-		String f = "";
-		for (long j : FlashCard.PIMSLEUR_TIMINGS)
-		{
-			f += " :: " + j;
-		}
 		currentCard.setNextDue(System.currentTimeMillis() + FlashCard.PIMSLEUR_TIMINGS[currentCard.getRanking()]);
 		db.storeCard(currentCard);
 		//alarmManager.cancel(getSyncPendingIntent(this));

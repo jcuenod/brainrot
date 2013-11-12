@@ -28,7 +28,7 @@
     <string name="str_btn_flipback">Flip Back</string>
     <string-array name="arr_str_graphoptions">
         <item >Rotten Pie</item>
-        <item >Dots of rot</item>
+        <item >Dots of Rot</item>
     </string-array>
     
 </resources>

@@ -7,13 +7,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class ImportAsyncTask extends AsyncTask<File, Integer, ArrayList<FlashCard>> {
+public class ImportAsyncTask extends AsyncTask<File, Integer, Integer> {
 	protected DBHelper db;
 	public static final int DIALOG_IMPORT_PROGRESS = 0;
 	private static final String LOG_TAG = "BrainRot ImportAsyncTask";
@@ -43,7 +41,7 @@ public class ImportAsyncTask extends AsyncTask<File, Integer, ArrayList<FlashCar
     }
 	
     @Override
-    protected ArrayList<FlashCard> doInBackground(File... file) {
+    protected Integer doInBackground(File... file) {
 		Log.v(LOG_TAG, "doinback begin");
 		try {
         	try {
@@ -51,8 +49,8 @@ public class ImportAsyncTask extends AsyncTask<File, Integer, ArrayList<FlashCar
     		    BufferedReader br = new BufferedReader(new FileReader(file[0]));
     		    Log.i(LOG_TAG, "buffered reader");
     		    FlashCard f;
-    		    ArrayList<FlashCard> cards = new ArrayList();
-    		    ArrayList<String> packs = new ArrayList();
+    		    ArrayList<FlashCard> cards = new ArrayList<FlashCard>();
+    		    ArrayList<String> packs = new ArrayList<String>();
     		    String line;
 
     		    Log.i(LOG_TAG, "starting while");
@@ -85,11 +83,11 @@ public class ImportAsyncTask extends AsyncTask<File, Integer, ArrayList<FlashCar
         	Log.v(LOG_TAG, "Error over filereading : " + e.toString());
             e.printStackTrace();
         }
-        return null;
+        return 0;
     }
 
     @Override
-    protected void onPostExecute(ArrayList<FlashCard> result) {
+    protected void onPostExecute(Integer result) {
     	db.close();
     	pd.dismiss();
     }
@@ -101,22 +99,3 @@ public class ImportAsyncTask extends AsyncTask<File, Integer, ArrayList<FlashCar
     	super.onProgressUpdate(values);
     }
 }
-//
-//
-//@Override
-//protected Dialog onCreateDialog(int id) {
-//    switch (id) {
-//    case DIALOG_IMPORT_PROGRESS:
-//        mProgressDialog = new ProgressDialog(this);
-//        mProgressDialog.setMessage("Retrieving latest announcements...");
-//        mProgressDialog.setIndeterminate(false);
-//        mProgressDialog.setMax(100);
-//        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-//        mProgressDialog.setCancelable(true);
-//        mProgressDialog.show();
-//        return mProgressDialog;
-//    default:
-//        return null;
-//    }
-//
-//}

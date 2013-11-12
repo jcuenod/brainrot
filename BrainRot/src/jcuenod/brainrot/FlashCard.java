@@ -14,13 +14,6 @@ public class FlashCard {
 		25 * 24 * 60 * 60 * 1000L, //25 days
 		4 * 30 * 24 * 60 * 60 * 1000L, //4 months
 		2 * 365 * 24 * 60 * 60 * 1000L //2 years
-		/*100,
-		3000,
-		7 * 1000,
-		15 * 1000,
-		25 * 1000,
-		35 * 1000,
-		50 * 1000*/
 	};
 	public static String [] PIMSLEUR_TIMINGS_STRING = {
 		"",

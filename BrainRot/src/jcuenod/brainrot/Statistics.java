@@ -5,18 +5,17 @@ import java.util.Map;
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
 import org.achartengine.model.CategorySeries;
+import org.achartengine.model.XYMultipleSeriesDataset;
 import org.achartengine.renderer.DefaultRenderer;
 import org.achartengine.renderer.SimpleSeriesRenderer;
+import org.achartengine.renderer.XYSeriesRenderer;
 
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -27,7 +26,9 @@ public class Statistics extends Activity {
 	protected DBHelper db;
 	GraphicalView mChartView = null;
 	private DefaultRenderer mRenderer = new DefaultRenderer();
-	private CategorySeries mSeries = new CategorySeries("Expenses");
+	private CategorySeries mSeries = new CategorySeries("Rotten Pie");
+	private XYSeriesRenderer xyRenderer = new XYSeriesRenderer();
+	private XYMultipleSeriesDataset xySeries = new XYMultipleSeriesDataset();
 	private static int[] COLORS = new int[] {
 	    Color.GREEN, Color.BLUE, Color.MAGENTA, Color.YELLOW, Color.RED, Color.DKGRAY, Color.BLACK};
 	
@@ -40,7 +41,6 @@ public class Statistics extends Activity {
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.arr_str_graphoptions, android.R.layout.simple_spinner_item);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spnGraphPicker.setAdapter(adapter);
-		spnGraphPicker.setPrompt("Pack pie");
 		spnGraphPicker.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
 		    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
@@ -128,6 +128,7 @@ public class Statistics extends Activity {
 	public void draw_DotsOfRot()
 	{
 		RelativeLayout layout = (RelativeLayout) findViewById(R.id.rl_chart);
+//		ChartFactory.getScatterChartView(this, xySeries, xyRenderer);
 		layout.removeAllViews();	
 	}
 

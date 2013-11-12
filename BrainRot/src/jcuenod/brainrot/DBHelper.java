@@ -7,7 +7,6 @@ import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -17,7 +16,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import android.widget.Toast;
 
 public class DBHelper extends SQLiteOpenHelper {
 	private static final String LOG_TAG = "BrainRot DBH";
@@ -183,7 +181,8 @@ public class DBHelper extends SQLiteOpenHelper {
     	String selection = COL_CARD_ID + " LIKE ?";
     	String[] selectionArgs = { String.valueOf(card.getCardId()) };
 
-    	int count = db.update(
+    	//int count = 
+    	db.update(
     	    TBL_CARDS,
     	    values,
     	    selection,
@@ -433,16 +432,19 @@ public class DBHelper extends SQLiteOpenHelper {
 
     	try
     	{
-    		Log.v(LOG_TAG, "trying backup/restore");
     		destinationDB.createNewFile();
             if (destinationDB.canWrite())
             {
-                FileChannel src = new FileInputStream(sourceDB).getChannel();
-                FileChannel dst = new FileOutputStream(destinationDB).getChannel();
-            	Log.e(LOG_TAG, "transferring");
+            	FileInputStream finstream = new FileInputStream(sourceDB);
+                FileChannel src = finstream.getChannel();
+                FileOutputStream foutstream = new FileOutputStream(destinationDB);
+                FileChannel dst = foutstream.getChannel();
+            	Log.v(LOG_TAG, "transferring");
                 dst.transferFrom(src, 0, src.size());
                 src.close();
                 dst.close();
+                finstream.close();
+                foutstream.close();
                 Log.i(LOG_TAG, "backup/restore done: " + sourceDB.getPath() +" -> " + destinationDB.getPath());
             }
             else
@@ -494,7 +496,7 @@ public class DBHelper extends SQLiteOpenHelper {
     	    );
     	c.moveToFirst();
     	
-    	ArrayList<FlashCard> ret = new ArrayList();
+    	ArrayList<FlashCard> ret = new ArrayList<FlashCard>();
     	while (!c.isAfterLast())
     	{
     		int cardId = c.getInt(c.getColumnIndexOrThrow(COL_CARD_ID));
