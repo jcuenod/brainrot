@@ -42,18 +42,15 @@ public class ImportAsyncTask extends AsyncTask<File, Integer, Integer> {
 	
     @Override
     protected Integer doInBackground(File... file) {
-		Log.v(LOG_TAG, "doinback begin");
 		try {
         	try {
     			
     		    BufferedReader br = new BufferedReader(new FileReader(file[0]));
-    		    Log.i(LOG_TAG, "buffered reader");
     		    FlashCard f;
     		    ArrayList<FlashCard> cards = new ArrayList<FlashCard>();
     		    ArrayList<String> packs = new ArrayList<String>();
     		    String line;
 
-    		    Log.i(LOG_TAG, "starting while");
     		    while ((line = br.readLine()) != null)
     		    {
     		        String [] flashcarddata = line.split("::"); //structured as "sideone::sidetwo::str_packname"
@@ -61,15 +58,12 @@ public class ImportAsyncTask extends AsyncTask<File, Integer, Integer> {
     		        cards.add(f);
     		        packs.add(new String(flashcarddata[2]));
     			}
-    		    Log.i(LOG_TAG, "now closing");
-    			
     		    br.close();
     		    
     		    pd.setMax(cards.size());
     			for (int i = 0; i < cards.size(); i++)
     			{
-    				Log.v(LOG_TAG, "i=" + i + " (card.size=" + cards.size() + ")");
-        			db.addQuestions(cards.get(i), packs.get(i));
+        			db.addCard(cards.get(i), packs.get(i));
     				publishProgress(i);
     			}
     		}

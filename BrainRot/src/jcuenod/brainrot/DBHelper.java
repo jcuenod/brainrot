@@ -21,7 +21,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	private static final String LOG_TAG = "BrainRot DBH";
 	
     // If you change the database schema, you must increment the database version.
-	private static final int DATABASE_VERSION = 7;
+	private static final int DATABASE_VERSION = 8;
     private static final String DATABASE_NAME = "BrainRot.db";
     
     private static final String TBL_CARDS = "cards";
@@ -37,6 +37,10 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String TBL_PACKS = "packs";
     private static final String COL_PACK_ID = "pack_id";
     private static final String COL_PACK_NAME = "pack_name";
+
+    private static final String TBL_PACK_CARDS = "packcards";
+//    private static final String COL_PACK_ID = "pack_id"; //listed under tbl_packs
+//    private static final String COL_CARD_ID = "card_id"; //listed under tbl_cards
     
     
     private static final String [] SQL_CREATE_ENTRIES = { 
@@ -53,6 +57,14 @@ public class DBHelper extends SQLiteOpenHelper {
     		"CREATE TABLE " + TBL_PACKS + " (" +
     		COL_PACK_ID + " INTEGER," +
     		COL_PACK_NAME + " TEXT" +
+    		")",
+    		"CREATE TABLE " + TBL_PACK_CARDS + " (" +
+					COL_PACK_ID + " INTEGER ," +
+					COL_CARD_ID + " INTEGER, " +
+    				"PRIMARY KEY (" +
+    					COL_PACK_ID + ", " +
+    					COL_CARD_ID +
+    				")" +
     		")"
     };
     
@@ -72,14 +84,31 @@ public class DBHelper extends SQLiteOpenHelper {
     	}
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // This database is only a cache for online data, so its upgrade policy is
-        // to simply to discard the data and start over
-    	for (String entry : SQL_DELETE_ENTRIES)
+    	if (oldVersion <= 7)
     	{
-    		db.execSQL(entry);
+    		SimpleDateFormat s = new SimpleDateFormat("yyyyMMdd-hhmmss");
+    		this.copyDB(new File(db.getPath()), new File("/sdcard/brainrot-bck-" + s.format(new Date()) + ".db"));
+    		db.execSQL(SQL_CREATE_ENTRIES[2]);
+//    		"CREATE TABLE " + TBL_PACK_CARDS + " (" +
+//					COL_PACK_ID + " INTEGER ," +
+//					COL_CARD_ID + " INTEGER, " +
+//    				"PRIMARY KEY (" +
+//    					COL_PACK_ID + " INTEGER ," +
+//    					COL_CARD_ID + " INTEGER" +
+//    				")" +
+//    		")"
+    		
+        	ContentValues values = new ContentValues();
+        	values.put(COL_PACK_NAME, "First Pack");
+        	Log.v(LOG_TAG, "adding first pack...");
+        	long packId = db.insert(
+        	         TBL_PACKS,
+        	         COL_PACK_ID,
+        	         values);
+        	
+    		db.execSQL("INSERT INTO " + TBL_PACK_CARDS + " (" + COL_PACK_ID + ", " + COL_CARD_ID + ") SELECT " + packId + ", " + COL_CARD_ID + " FROM " + TBL_CARDS); 
     	}
-        onCreate(db);
-        //TODO: populate();
+    	
     }
     public void truncateTables()
     {
@@ -131,9 +160,25 @@ public class DBHelper extends SQLiteOpenHelper {
     {
     	return 0;
     }
+    public long createPack(String packName)
+    {
+    	SQLiteDatabase db = this.getWritableDatabase();//getReadableDatabase();
+
+    	ContentValues values = new ContentValues();
+    	values.put(COL_PACK_NAME, packName);
+    	Log.v(LOG_TAG, "adding Question with pack id: values prepared");
+
+    	// Insert the new row, returning the primary key value of the new row
+    	long newRowId = db.insert(
+    	         TBL_PACKS,
+    	         COL_PACK_ID,
+    	         values);
+    	Log.v(LOG_TAG, "New Pack: " + String.valueOf(newRowId));
+    	return newRowId;
+    }
 
     
-    public void addQuestions(FlashCard card, int packId)
+    public void addCard(FlashCard card, int packId)
     {
     	Log.v(LOG_TAG, "adding Question with pack id");
     	// Gets the data repository in write mode
@@ -157,10 +202,10 @@ public class DBHelper extends SQLiteOpenHelper {
     	Log.v(LOG_TAG, "New Card: " + String.valueOf(newRowId));
     	Log.v(LOG_TAG, "adding Question with pack id: success");
     }
-    public void addQuestions(FlashCard card, String pack)
+    public void addCard(FlashCard card, String pack)
     {
     	Log.v(LOG_TAG, "adding Question with string pack");
-    	this.addQuestions(card, this.getPackId(pack));
+    	this.addCard(card, this.getPackId(pack));
     	Log.v(LOG_TAG, "adding Question with string pack: success");
     }
     
@@ -429,7 +474,10 @@ public class DBHelper extends SQLiteOpenHelper {
     		//destinationDB = internalDB;
     		//sourceDB = externalDB;
     	}
-
+    	return copyDB(sourceDB, destinationDB);
+    }
+    private boolean copyDB(File sourceDB, File destinationDB)
+    {
     	try
     	{
     		destinationDB.createNewFile();
