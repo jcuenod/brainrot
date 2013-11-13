@@ -462,7 +462,7 @@ public class MainActivity extends Activity {
 		vs.setDisplayedChild(0);
 		vs = (ViewSwitcher) findViewById(R.id.vs_welcome);
 		vs.setDisplayedChild(1);
-		Log.v(LOG_TAG, "card displayed");
+		Log.v(LOG_TAG, "card displayed: " + LanguageUtils.domagic(currentCard.getSideOne()));
 	}
 	
 	public void do_promote(int ranking)
