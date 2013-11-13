@@ -21,13 +21,14 @@ public class DBHelper extends SQLiteOpenHelper {
 	private static final String LOG_TAG = "BrainRot DBH";
 	
     // If you change the database schema, you must increment the database version.
-	private static final int DATABASE_VERSION = 8;
+	private static final int DATABASE_VERSION = 9;
     private static final String DATABASE_NAME = "BrainRot.db";
     
     private static final String TBL_CARDS = "cards";
     private static final String COL_CARD_ID = "card_id";
     private static final String COL_SIDE_ONE = "side_one";
     private static final String COL_SIDE_TWO = "side_two";
+    private static final String COL_SIDE_ONE_TRANSLITERATION = "side_one_transliteration";
     private static final String COL_DISPLAY_COUNT = "display_count";
     private static final String COL_RANKING = "ranking"; //from 1 to 11 - based on pimsleur's 11 ranks
     private static final String COL_LAST_SEEN = "last_seen";
@@ -48,14 +49,14 @@ public class DBHelper extends SQLiteOpenHelper {
     		COL_CARD_ID + " INTEGER PRIMARY KEY," +
     		COL_SIDE_ONE + " TEXT, " +
     		COL_SIDE_TWO + " TEXT, " +
+    		COL_SIDE_ONE_TRANSLITERATION + " TEXT, " +
     		COL_DISPLAY_COUNT + " INTEGER, " +
     		COL_RANKING + " INTEGER, " +
     		COL_LAST_SEEN + " INTEGER," +
-    		COL_NEXT_DUE + " INTEGER," +
-    		COL_PACK_ID + " INTEGER" +
+    		COL_NEXT_DUE + " INTEGER" +
     		")",
     		"CREATE TABLE " + TBL_PACKS + " (" +
-    		COL_PACK_ID + " INTEGER," +
+    		COL_PACK_ID + " INTEGER PRIMARY KEY," +
     		COL_PACK_NAME + " TEXT" +
     		")",
     		"CREATE TABLE " + TBL_PACK_CARDS + " (" +
@@ -107,6 +108,55 @@ public class DBHelper extends SQLiteOpenHelper {
         	         values);
         	
     		db.execSQL("INSERT INTO " + TBL_PACK_CARDS + " (" + COL_PACK_ID + ", " + COL_CARD_ID + ") SELECT " + packId + ", " + COL_CARD_ID + " FROM " + TBL_CARDS); 
+    	}
+    	if (oldVersion <= 8)
+    	{
+    		SimpleDateFormat s = new SimpleDateFormat("yyyyMMdd-hhmmss");
+    		this.copyDB(new File(db.getPath()), new File("/sdcard/brainrot-bck-" + s.format(new Date()) + ".db"));
+    		db.execSQL("ALTER TABLE " + TBL_CARDS + 
+    				" ADD COLUMN " + COL_SIDE_ONE_TRANSLITERATION + " TEXT"
+    		);
+        	// Define a projection that specifies which columns from the database
+        	// you will actually use after this query.
+        	String[] projection = {
+        	    COL_CARD_ID,
+        	    COL_SIDE_ONE,
+        	    };
+        
+        	Cursor c = db.query(
+        	    TBL_CARDS,  // The table to query
+        	    projection, // The columns to return
+        	    null,       // The columns for the WHERE clause
+        	    null,       // The values for the WHERE clause
+        	    null,       // don't group the rows
+        	    null,       // don't filter by row groups
+        	    null		// The sort order
+        	    );
+        	c.moveToFirst();
+
+        	int i = 0;
+    		Log.v(LOG_TAG, "Running update...");
+        	while (!c.isAfterLast())
+        	{
+        		ContentValues values = new ContentValues();
+            	values.put(COL_SIDE_ONE_TRANSLITERATION, LanguageUtils.domagic(c.getString(c.getColumnIndexOrThrow(COL_SIDE_ONE))));
+
+            	// Which row to update, based on the ID
+            	String selection = COL_CARD_ID + " LIKE ?";
+            	String[] selectionArgs = { String.valueOf(c.getInt(c.getColumnIndexOrThrow(COL_CARD_ID))) };
+
+            	//int count = 
+            	db.update(
+            	    TBL_CARDS,
+            	    values,
+            	    selection,
+            	    selectionArgs);
+        		c.moveToNext();
+        		if (i++ % 100 == 0)
+        		{
+            		Log.v(LOG_TAG, "(still busy running update)");
+        		}
+        	}
     	}
     	
     }
@@ -188,6 +238,7 @@ public class DBHelper extends SQLiteOpenHelper {
     	ContentValues values = new ContentValues();
     	values.put(COL_SIDE_ONE, card.getSideOne());
     	values.put(COL_SIDE_TWO, card.getSideTwo());
+    	values.put(COL_SIDE_ONE_TRANSLITERATION, LanguageUtils.domagic(card.getSideOne()));
     	values.put(COL_DISPLAY_COUNT, card.getDisplayCount());
     	values.put(COL_RANKING, card.getRanking());
     	values.put(COL_LAST_SEEN, card.getLastSeen());
@@ -207,7 +258,7 @@ public class DBHelper extends SQLiteOpenHelper {
     
     public void storeCard(FlashCard card)
     {
-    	SQLiteDatabase db = this.getWritableDatabase();//getReadableDatabase();
+    	SQLiteDatabase db = this.getWritableDatabase();
 
     	// New value for one column
     	ContentValues values = new ContentValues();
