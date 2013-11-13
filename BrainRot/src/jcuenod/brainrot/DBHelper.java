@@ -178,7 +178,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     
-    public void addCard(FlashCard card, int packId)
+    public long addCard(FlashCard card, int packId)
     {
     	Log.v(LOG_TAG, "adding Question with pack id");
     	// Gets the data repository in write mode
@@ -195,18 +195,14 @@ public class DBHelper extends SQLiteOpenHelper {
     	Log.v(LOG_TAG, "adding Question with pack id: values prepared");
 
     	// Insert the new row, returning the primary key value of the new row
-    	long newRowId = db.insert(
+    	return db.insert(
     	         TBL_CARDS,
     	         COL_CARD_ID,
     	         values);
-    	Log.v(LOG_TAG, "New Card: " + String.valueOf(newRowId));
-    	Log.v(LOG_TAG, "adding Question with pack id: success");
     }
-    public void addCard(FlashCard card, String pack)
+    public long addCard(FlashCard card, String pack)
     {
-    	Log.v(LOG_TAG, "adding Question with string pack");
-    	this.addCard(card, this.getPackId(pack));
-    	Log.v(LOG_TAG, "adding Question with string pack: success");
+    	return this.addCard(card, this.getPackId(pack));
     }
     
     public void storeCard(FlashCard card)
