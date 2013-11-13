@@ -9,14 +9,15 @@ Two .brc (brain rot card) files are included:
 
 Hopefully these will give you an idea of the application:
 ![Side One](screenshots/sideone+menu.png)
-![Splash Screen](screenshots/splashscreen.png) ::  ::  :: ![Side Two](screenshots/sidetwo.png) ::  ::  :: ![Statistics](screenshots/statistics.png)
+![Splash Screen](screenshots/splashscreen.png)  ![Side Two](screenshots/sidetwo.png) ![Statistics](screenshots/statistics.png)
 
 
 Options
 ==
-It is also possible to 
-Review cards recently seen
+It is also possible to review cards recently seen
+
 ![Card History](screenshots/cardhistory.png)
 
 And manually set the rank of a card (i.e. tell Brain Rot that you know this card already)
+
 ![Set Rank](screenshots/setrank.png)
