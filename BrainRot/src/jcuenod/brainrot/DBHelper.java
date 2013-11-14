@@ -471,7 +471,7 @@ public class DBHelper extends SQLiteOpenHelper {
     	return c.getCount();
     }
     
-    public Map<Integer, Integer> getStats()
+    public Map<Integer, Integer> getPieChartStats()
     {
     	SQLiteDatabase db = getReadableDatabase();
 
@@ -494,6 +494,36 @@ public class DBHelper extends SQLiteOpenHelper {
     	while (!c.isAfterLast())
     	{
     		ret.put(c.getInt(c.getColumnIndexOrThrow(COL_RANKING)), c.getInt(c.getColumnIndexOrThrow("counter")));
+    		c.moveToNext();
+    	}
+    	return ret;
+    }
+    public Map<Integer, Integer> getScatterChartStats()
+    {
+    	SQLiteDatabase db = getReadableDatabase();
+
+    	// you will actually use after this query.
+    	String[] projection = { COL_RANKING, COL_DISPLAY_COUNT };
+    	// Define 'where' part of query.
+    	String selection = COL_DISPLAY_COUNT + " != ? ";
+    	// Specify arguments in placeholder order.
+    	String[] selectionArgs = { "0" };
+    	
+    	Cursor c = db.query(
+    	    TBL_CARDS, // The table to query
+    	    projection, // The columns to return
+    	    selection,
+    	    selectionArgs,
+    	    null,
+    	    null,
+    	    null
+    	    );
+    	//Log.w(LOG_TAG, msg)
+    	c.moveToFirst();
+    	Map<Integer, Integer> ret = new TreeMap<Integer, Integer>();
+    	while (!c.isAfterLast())
+    	{
+    		ret.put(c.getInt(c.getColumnIndexOrThrow(COL_RANKING)), c.getInt(c.getColumnIndexOrThrow(COL_DISPLAY_COUNT)));
     		c.moveToNext();
     	}
     	return ret;
