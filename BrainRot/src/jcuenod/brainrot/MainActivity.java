@@ -53,6 +53,8 @@ public class MainActivity extends Activity {
 	private Typeface unicodeface;
 
 	private ArrayList<FlashCard> cardHistory;
+	private int previousCardDialogPagination = 0;
+	private int previousCardDialogPageSize = 10;
 	
 	public static boolean isInForeground = false;
 	
@@ -217,21 +219,8 @@ public class MainActivity extends Activity {
         		Toast.makeText(this, "Search not yet implemented...", Toast.LENGTH_SHORT).show();
         		return true;
         	case R.id.action_cardhistory:
-        		cardHistory = db.getCardHistory();
-        		String [] previousCards = new String[cardHistory.size()];
-        		Log.v(LOG_TAG, "here we go: 0-" + cardHistory.size());
-        		for (int i = 0; i < cardHistory.size(); i++)
-        		{
-        			previousCards[i] = String.valueOf(i + 1) + ": " + cardHistory.get(i).getSideOne();
-        		}
-        		Response [] r = new Response[1];
-        		r[0] = new Response() {
-	   				public void respond(int which)
-	   				{
-	   					do_previousCard(which);
-	   				}
-	   			};
-	   			build_dialog("Card History", previousCards, r, true);
+        		previousCardDialogPagination = 0; 
+        		previousCardDialog();
         		return true;
         	case R.id.action_statistics:
 				Intent statintent = new Intent(getApplicationContext(), Statistics.class);
@@ -490,6 +479,34 @@ public class MainActivity extends Activity {
 		{
 			((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancelAll();
 		}
+	}
+	
+	private void previousCardDialog()
+	{
+		cardHistory = db.getCardHistory(previousCardDialogPagination * previousCardDialogPageSize, previousCardDialogPageSize);
+		String [] previousCards = new String[cardHistory.size() + 1];
+		for (int i = 0; i < cardHistory.size(); i++)
+		{
+			previousCards[i] = String.valueOf(i + 1) + ": " + cardHistory.get(i).getSideOne();
+		}
+		Response [] r = new Response[1];
+		r[0] = new Response() {
+			public void respond(int which)
+			{
+				if (which == previousCardDialogPageSize)
+				{
+					previousCardDialogPagination++;
+					previousCardDialog();
+				}
+				else
+				{
+					do_previousCard(which);
+				}
+			}
+		};
+		previousCards[cardHistory.size()] = String.valueOf("Show Previous " + String.valueOf(previousCardDialogPageSize));
+		
+		build_dialog("Card History", previousCards, r, true);
 	}
 
 	private void build_dialog(String title, String [] options, Response [] responses)

@@ -586,12 +586,7 @@ public class DBHelper extends SQLiteOpenHelper {
     	return true;
     }
     
-    public ArrayList<FlashCard> getCardHistory()
-    {
-    	return getCardHistory(10);
-    }
-    
-    public ArrayList<FlashCard> getCardHistory(int limit)
+    public ArrayList<FlashCard> getCardHistory(int startAt, int limit)
     {
     	SQLiteDatabase db = getReadableDatabase();
 
@@ -608,7 +603,7 @@ public class DBHelper extends SQLiteOpenHelper {
     	    };
 
     	// How you want the results sorted in the resulting Cursor
-    	String sortOrder = COL_LAST_SEEN + " DESC LIMIT " + String.valueOf(limit);
+    	String sortOrder = COL_LAST_SEEN + " DESC LIMIT " + String.valueOf(startAt) + ", "+ String.valueOf(limit);
     
     	Cursor c = db.query(
     	    TBL_CARDS,  // The table to query
