@@ -4,10 +4,13 @@ import java.util.Map;
 
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
+import org.achartengine.chart.PointStyle;
 import org.achartengine.model.CategorySeries;
 import org.achartengine.model.XYMultipleSeriesDataset;
+import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.DefaultRenderer;
 import org.achartengine.renderer.SimpleSeriesRenderer;
+import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
 import android.app.Activity;
@@ -29,7 +32,7 @@ public class Statistics extends Activity {
 	private CategorySeries mSeries = new CategorySeries("Rotten Pie");
 	private XYSeriesRenderer xyRenderer = new XYSeriesRenderer();
 	private XYMultipleSeriesDataset xySeries = new XYMultipleSeriesDataset();
-	private static int[] COLORS = new int[] {
+	private final int[] COLORS = new int[] { 
 	    Color.GREEN, Color.BLUE, Color.MAGENTA, Color.YELLOW, Color.RED, Color.DKGRAY, Color.BLACK};
 	
 	@Override  
@@ -60,29 +63,7 @@ public class Statistics extends Activity {
 		});
 		
 		db = new DBHelper(getApplicationContext());
-		
 		this.draw_rottenPie();
-		/*mRenderer.setApplyBackgroundColor(true);  
-		mRenderer.setBackgroundColor(Color.argb(100, 50, 50, 50));  
-		mRenderer.setChartTitleTextSize(20);  
-		mRenderer.setLabelsTextSize(15);  
-		mRenderer.setLegendTextSize(15);  
-		mRenderer.setMargins(new int[] { 20, 30, 15, 0 });  
-		mRenderer.setZoomButtonsVisible(true);  
-		mRenderer.setStartAngle(90);  
-
-		for (int i = 0; i < VALUES.length; i++) {  
-			mSeries.add(NAME_LIST[i] + " " + VALUES[i], VALUES[i]);  
-			SimpleSeriesRenderer renderer = new SimpleSeriesRenderer();  
-			renderer.setColor(COLORS[(mSeries.getItemCount() - 1) % COLORS.length]);  
-			mRenderer.addSeriesRenderer(renderer);  
-		}  
-
-		if (mChartView != null) {  
-			mChartView.repaint();  
-		}  */
-		
-
 	}
 
 	@Override
@@ -94,11 +75,28 @@ public class Statistics extends Activity {
 	
 	private void draw_rottenPie()
 	{
-		Map<Integer, Integer> stats = db.getStats();
+		mRenderer = new DefaultRenderer();
+//		mRenderer.setApplyBackgroundColor(true);  
+//		mRenderer.setBackgroundColor(Color.argb(100, 50, 50, 50));  
+//		mRenderer.setChartTitleTextSize(20);  
+//		mRenderer.setLabelsTextSize(15);  
+//		mRenderer.setLegendTextSize(15);  
+//		mRenderer.setMargins(new int[] { 20, 30, 15, 0 });  
+//		mRenderer.setZoomButtonsVisible(true);  
+//		mRenderer.setStartAngle(90);  
+//
+//		for (int i = 0; i < VALUES.length; i++) {  
+//			mSeries.add(NAME_LIST[i] + " " + VALUES[i], VALUES[i]);  
+//			SimpleSeriesRenderer renderer = new SimpleSeriesRenderer();  
+//			renderer.setColor(COLORS[(mSeries.getItemCount() - 1) % COLORS.length]);  
+//			mRenderer.addSeriesRenderer(renderer);  
+//		}  
+//
+//		
+		Map<Integer, Integer> stats = db.getPieChartStats();
 		String [] numberStrings = {"Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"};
 		int total = 0;
 		mSeries.clear();
-		mRenderer = new DefaultRenderer();
 
 		for (int key : stats.keySet())
 		{
@@ -113,8 +111,7 @@ public class Statistics extends Activity {
 			renderer.setDisplayChartValues(true);
 			mRenderer.addSeriesRenderer(renderer);
 		}  
-		mRenderer.setLabelsTextSize(20);
-		mRenderer.setChartTitle("Rotting Statistics");
+		mRenderer.setLabelsTextSize(25);
 		mRenderer.setShowLegend(false);
 		mChartView = ChartFactory.getPieChartView(this, mSeries, mRenderer);
 		
@@ -127,9 +124,106 @@ public class Statistics extends Activity {
 	}
 	public void draw_DotsOfRot()
 	{
+		//TODO: support packs here (each pack needs a title and the db will need to return info grouped by pack somehow...) c.f. later todo for more info
+		XYMultipleSeriesRenderer renderer = new XYMultipleSeriesRenderer();
+		renderer.setAxisTitleTextSize(16);
+	    renderer.setChartTitleTextSize(20);
+	    renderer.setLabelsTextSize(15);
+	    renderer.setLegendTextSize(15);
+	    renderer.setPointSize(1f);
+	    renderer.setMargins(new int[] { 20, 30, 15, 20 });
+
+		String[] titles = new String[] { "Display Count vs Ranking" };
+		
+	    XYSeriesRenderer r = new XYSeriesRenderer();
+	    for (int i = 0; i < titles.length; i++)
+	    {
+	    	r.setColor(COLORS[i % COLORS.length]);
+	    	r.setPointStyle(PointStyle.CIRCLE);
+	    	renderer.addSeriesRenderer(r);
+	    }
+			    
+	    renderer.setXLabels(10);
+	    renderer.setYLabels(10);
+	    for (int i = 0; i < renderer.getSeriesRendererCount(); i++) {
+	      ((XYSeriesRenderer) renderer.getSeriesRendererAt(i)).setFillPoints(true);
+	    }
+
+		Map<Integer, Integer> values = db.getScatterChartStats();	    
+	    XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
+	    
+	    int length = titles.length;
+	    double xMax = 0;
+	    double yMax = 0;
+	    for (int i = 0; i < length; i++) {
+	    	XYSeries series = new XYSeries(titles[i]);
+	    	for (Map.Entry<Integer, Integer> entry : values.entrySet())
+	    	{
+	    		double xVal = (double)entry.getKey();
+	    		double yVal = (double)entry.getValue();
+	    		xMax = xMax <  xVal ? xVal : xMax;
+	    		yMax = yMax <  yVal ? yVal : yMax;
+	    		series.add(xVal, yVal);
+	    	}
+	    	dataset.addSeries(series);
+	    	Log.v(LOG_TAG, "series added (" + series.getItemCount() + ")");
+	    }
+	    
+
+//	    setChartSettings(renderer, "Scatter chart", "X", "Y", -10, 30, -10, 51, Color.GRAY,
+//	        Color.LTGRAY);
+	    renderer.setChartTitle("Dots of Rot");
+	    renderer.setXTitle("Next Due");
+	    renderer.setYTitle("Display Count");
+	    renderer.setXAxisMin(0);
+	    renderer.setXAxisMax(xMax);
+	    renderer.setYAxisMin(0);
+	    renderer.setYAxisMax(yMax + 1);
+	    renderer.setAxesColor(Color.GRAY);
+	    renderer.setLabelsColor(Color.LTGRAY);
+	    
+		mChartView = ChartFactory.getScatterChartView(this, dataset, renderer);
 		RelativeLayout layout = (RelativeLayout) findViewById(R.id.rl_chart);
-//		ChartFactory.getScatterChartView(this, xySeries, xyRenderer);
-		layout.removeAllViews();	
+		layout.removeAllViews();
+		layout.addView(mChartView);
+		
+		
+		
+//		mRenderer.setPanLimits(new double[] { 00, 600 , 00, 300 });     //xmin,xmax,ymin,ymax  bars/grids limit
+//		mRenderer.setZoomLimits(new double[]{00, 200, 00, 30});     //xmin,xmax,ymin,ymax  zoom limit
+//        String seriesTitle = "Series " + (mDataset.getSeriesCount() + 1);
+//        XYSeries series = new XYSeries(seriesTitle);
+//        ArrayList<String> accuracy = getIntent().getExtras().getStringArrayList("accuracy");
+//        ArrayList<String> time = getIntent().getExtras().getStringArrayList("time");
+//        for (int i = 0; i < time.size(); i++) {
+//            series.add(Double.parseDouble(time.get(i)), Double.parseDouble(accuracy.get(i)));
+//        }
+//        mDataset.addSeries(series);
+//        mCurrentSeries = series;
+//        mRenderer.setYLabelsAlign(Paint.Align.RIGHT);
+//        XYSeriesRenderer renderer = new XYSeriesRenderer();
+//        mRenderer.addSeriesRenderer(renderer);
+//        mRenderer.setPointSize(15f);
+//        mCurrentRenderer = renderer;
+//
+//        if(mChartView== null){
+//
+//            //ADD VALUE OF X,Y HERE to the series
+//            mCurrentSeries.add(x,y);
+//
+//            if (mChartView != null) {
+//                mChartView.repaint();
+//            }
+//            mChartView = ChartFactory.getScatterChartView(ShowGraph.this, mDataset, mRenderer);
+//            mChartView.addPanListener(new PanListener() {
+//                public void panApplied() {
+//                    System.out.println("New X range=[" + mRenderer.getXAxisMin() + ", " + mRenderer.getXAxisMax()
+//                        + "], Y range=[" + mRenderer.getYAxisMax() + ", " + mRenderer.getYAxisMax() + "]");
+//                }
+//            });
+//            layout.addView(mChartView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
+//
+//        }    
 	}
 
 	
