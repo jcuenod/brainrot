@@ -148,6 +148,7 @@ public class MainActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
+		menu.findItem(R.id.action_learnnew).setChecked(learnNew);
 		return true;
 	}
 
@@ -239,6 +240,7 @@ public class MainActivity extends Activity {
         		SharedPreferences app_preferences = PreferenceManager.getDefaultSharedPreferences(this);
         		SharedPreferences.Editor editor = app_preferences.edit();
         		editor.putBoolean("learnNew", learnNew).commit();
+        		showCard();
         		return true;
         	case R.id.action_import:
         		do_import();
@@ -606,7 +608,6 @@ public class MainActivity extends Activity {
 	                    }
 	                });
 	            }
-
 	        });
 		}
 		al.show();
