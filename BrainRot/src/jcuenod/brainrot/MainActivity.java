@@ -86,13 +86,12 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		//TODO: onboot - restore alarm (or just show notification)
-		//TODO: revise mode vs test mode {i.e. just go over the due cards and exit or let me practice everything}
+		//TODO: when not learning new cards, exit on end?
 		//TODO: make promotion dependent on time gap allocation (so that I don't see one card 30 times in a morning and never see it for two years)
 		//TODO: stats (graph showing [display_count || group by word(count)] & [ranking{from 0?} || group by word(count)] & [due date || word(count)] & single word stats
 		//TODO: show number of words overdue (before notification goes away)
 		//TODO: support packs
 		//TODO: search cards (either side)
-		//TODO: fix font for unicode menus
 		/*
 		 * currentCard menu:
 		 * - set ranking

@@ -7,14 +7,18 @@ import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import jcuenod.brainrot.Statistics.ScatterChartCoords;
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 import android.util.Log;
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -88,7 +92,7 @@ public class DBHelper extends SQLiteOpenHelper {
     	if (oldVersion <= 7)
     	{
     		SimpleDateFormat s = new SimpleDateFormat("yyyyMMdd-hhmmss");
-    		this.copyDB(new File(db.getPath()), new File("/sdcard/brainrot-bck-" + s.format(new Date()) + ".db"));
+    		this.copyDB(new File(db.getPath()), new File(Environment.getExternalStorageDirectory().getPath() + "/brainrot-bck-" + s.format(new Date()) + ".db"));
     		db.execSQL(SQL_CREATE_ENTRIES[2]);
 //    		"CREATE TABLE " + TBL_PACK_CARDS + " (" +
 //					COL_PACK_ID + " INTEGER ," +
@@ -112,7 +116,7 @@ public class DBHelper extends SQLiteOpenHelper {
     	if (oldVersion <= 8)
     	{
     		SimpleDateFormat s = new SimpleDateFormat("yyyyMMdd-hhmmss");
-    		this.copyDB(new File(db.getPath()), new File("/sdcard/brainrot-bck-" + s.format(new Date()) + ".db"));
+    		this.copyDB(new File(db.getPath()), new File(Environment.getExternalStorageDirectory().getPath() + "/brainrot-bck-" + s.format(new Date()) + ".db"));
     		db.execSQL("ALTER TABLE " + TBL_CARDS + 
     				" ADD COLUMN " + COL_SIDE_ONE_TRANSLITERATION + " TEXT"
     		);
@@ -498,14 +502,14 @@ public class DBHelper extends SQLiteOpenHelper {
     	}
     	return ret;
     }
-    public Map<Integer, Integer> getScatterChartStats()
+    public ArrayList<ScatterChartCoords> getScatterChartStats()
     {
     	SQLiteDatabase db = getReadableDatabase();
 
     	// you will actually use after this query.
     	String[] projection = { COL_RANKING, COL_DISPLAY_COUNT };
     	// Define 'where' part of query.
-    	String selection = COL_DISPLAY_COUNT + " != ? ";
+    	String selection = COL_RANKING + " != ? ";
     	// Specify arguments in placeholder order.
     	String[] selectionArgs = { "0" };
     	
@@ -520,10 +524,13 @@ public class DBHelper extends SQLiteOpenHelper {
     	    );
     	//Log.w(LOG_TAG, msg)
     	c.moveToFirst();
-    	Map<Integer, Integer> ret = new TreeMap<Integer, Integer>();
+    	ArrayList<ScatterChartCoords> ret = new ArrayList<ScatterChartCoords>();
     	while (!c.isAfterLast())
     	{
-    		ret.put(c.getInt(c.getColumnIndexOrThrow(COL_RANKING)), c.getInt(c.getColumnIndexOrThrow(COL_DISPLAY_COUNT)));
+    		ScatterChartCoords cxy = new ScatterChartCoords();
+    		cxy.x = (double) c.getInt(c.getColumnIndexOrThrow(COL_RANKING));
+    		cxy.y = (double) c.getInt(c.getColumnIndexOrThrow(COL_DISPLAY_COUNT));
+    		ret.add(cxy);
     		c.moveToNext();
     	}
     	return ret;
