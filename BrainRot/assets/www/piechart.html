@@ -1,0 +1,51 @@
+<html>
+	<head>
+	<script>
+		function draw()
+		{
+			var canvas = document.getElementById("can");
+			var ctx = canvas.getContext("2d");
+			boxsize = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight;
+			boxsize *= 0.8;
+	  		ctx.canvas.width  = boxsize;
+			ctx.canvas.height = boxsize;
+			var lastend = 0;
+			var datapie = [%VAR_DATA%];
+			var colors = [%VAR_COLORS%];
+			var myTotal = 0;
+			var myColor = ["bdd179", "faedcd", "f8e5bd", "f6d6a1", "f4c190", "dcaa78", "d69c62", "ca806d", "af9189", "9e9a99", "697878", "485252"];
+		
+			for(var e = 0; e < datapie.length; e++)
+			{
+				myTotal += datapie[e];
+			}
+
+			for (var i = 0; i < datapie.length; i++) {
+				ctx.fillStyle = myColor[colors[i]];
+				ctx.beginPath();
+				ctx.moveTo(canvas.width/2,canvas.height/2);
+				ctx.arc(canvas.width/2,canvas.height/2,canvas.height/2,lastend,lastend+(Math.PI*2*(datapie[i]/myTotal)),false);
+				ctx.lineTo(canvas.width/2,canvas.height/2);
+				ctx.fill();
+				lastend += Math.PI*2*(datapie[i]/myTotal);
+			}
+		}
+
+		</script>
+		<style>
+			canvas {
+				margin: 5%;
+				padding: 0;
+			}
+			center {
+				margin: 0;
+				padding: 0;
+			}
+		</style>
+	</head>
+	<body onLoad="draw()">
+		<center>
+			<canvas id="can"></canvas>
+		</center>
+	</body>
+</html>
