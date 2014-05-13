@@ -1,5 +1,6 @@
 package jcuenod.brainrot;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.achartengine.ChartFactory;
@@ -18,6 +19,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.RelativeLayout;
@@ -28,12 +30,20 @@ public class Statistics extends Activity {
 	private static final String LOG_TAG = "BrainRot Statistics";
 	protected DBHelper db;
 	GraphicalView mChartView = null;
-	private DefaultRenderer mRenderer = new DefaultRenderer();
+	/*private DefaultRenderer mRenderer = new DefaultRenderer();
 	private CategorySeries mSeries = new CategorySeries("Rotten Pie");
 	private XYSeriesRenderer xyRenderer = new XYSeriesRenderer();
 	private XYMultipleSeriesDataset xySeries = new XYMultipleSeriesDataset();
+	*/
 	private final int[] COLORS = new int[] { 
 	    Color.GREEN, Color.BLUE, Color.MAGENTA, Color.YELLOW, Color.RED, Color.DKGRAY, Color.BLACK};
+	
+	
+	public static class ScatterChartCoords
+	{
+		double x;
+		double y;
+	}
 	
 	@Override  
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +54,17 @@ public class Statistics extends Activity {
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.arr_str_graphoptions, android.R.layout.simple_spinner_item);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spnGraphPicker.setAdapter(adapter);
-		spnGraphPicker.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+		
+		
+		
+        
+        
+		/*String html_value = "<html>	<head>	<script>	function draw()	{	var canvas = document.getElementById(\"can\");var ctx = canvas.getContext(\"2d\");	boxsize =   ctx.canvas.width  = window.innerWidth;  ctx.canvas.height = window.innerHeight;var lastend = 0;var datapie = [20,60,25,45,150,75];var myTotal = 0;var myColor = [\"485252\", \"697878\", \"9e9a99\", \"af9189\", \"ca806d\", \"dcaa78\", \"f4c190\", \"f6d6a1\", \"f8e5bd\", \"faedcd\", \"bdd179\"];for(var e = 0; e < datapie.length; e++){  myTotal += datapie[e];}for (var i = 0; i < datapie.length; i++) {ctx.fillStyle = myColor[i];ctx.beginPath();ctx.moveTo(canvas.width/2,canvas.height/2);ctx.arc(canvas.width/2,canvas.height/2,canvas.height/2,lastend,lastend+(Math.PI*2*(datapie[i]/myTotal)),false);ctx.lineTo(canvas.width/2,canvas.height/2);ctx.fill();lastend += Math.PI*2*(datapie[i]/myTotal);}}	</script>	</head>		<body onLoad=\"draw()\">	<canvas id=\"can\"></canvas>		</body></html>";
+		WebView browser = (WebView) findViewById(R.id.wv_chart);
+        browser.getSettings().setJavaScriptEnabled(true);
+        browser.loadData(html_value, "text/html", "UTF-8");*/
+		
+		/*spnGraphPicker.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
 		    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 		        //Object item = parent.getItemAtPosition(pos);
@@ -60,10 +80,26 @@ public class Statistics extends Activity {
 		    }
 		    public void onNothingSelected(AdapterView<?> parent) {
 		    }
-		});
+		});*/
 		
 		db = new DBHelper(getApplicationContext());
-		this.draw_rottenPie();
+		
+		Map<Integer, Integer> stats = db.getPieChartStats();
+
+		String data = "";
+		String colors = "";
+		for (int key : stats.keySet())
+		{
+			data += stats.get(key) + ",";
+			colors += key + ",";
+		}
+		Log.i(LOG_TAG, "data: " + data + " :: colors: " + colors);
+		String html_value = "<html><head><script>function draw(){var canvas = document.getElementById(\"can\");var ctx = canvas.getContext(\"2d\");boxsize = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight;boxsize *= 0.8;  ctx.canvas.width  = boxsize;ctx.canvas.height = boxsize;var lastend = 0;var datapie = [" + data + "];var colors = [" + colors + "];var myTotal = 0;var myColor = [\"bdd179\", \"faedcd\", \"f8e5bd\", \"f6d6a1\", \"f4c190\", \"dcaa78\", \"d69c62\", \"ca806d\", \"af9189\", \"9e9a99\", \"697878\", \"485252\"];for(var e = 0; e < datapie.length; e++){myTotal += datapie[e];}for (var i = 0; i < datapie.length; i++) {ctx.fillStyle = myColor[colors[i]];ctx.beginPath();ctx.moveTo(canvas.width/2,canvas.height/2);ctx.arc(canvas.width/2,canvas.height/2,canvas.height/2,lastend,lastend+(Math.PI*2*(datapie[i]/myTotal)),false);ctx.lineTo(canvas.width/2,canvas.height/2);ctx.fill();lastend += Math.PI*2*(datapie[i]/myTotal);}}</script><style>canvas {margin: auto;padding: 0;}</style></head><body onLoad=\"draw()\"><canvas id=\"can\"></canvas></body></html>";
+		
+		WebView browser = (WebView) findViewById(R.id.wv_chart);
+        browser.getSettings().setJavaScriptEnabled(true);
+        browser.loadData(html_value, "text/html", "UTF-8");
+		//this.draw_rottenPie();
 	}
 
 	@Override
@@ -75,7 +111,7 @@ public class Statistics extends Activity {
 	
 	private void draw_rottenPie()
 	{
-		mRenderer = new DefaultRenderer();
+//		mRenderer = new DefaultRenderer();
 //		mRenderer.setApplyBackgroundColor(true);  
 //		mRenderer.setBackgroundColor(Color.argb(100, 50, 50, 50));  
 //		mRenderer.setChartTitleTextSize(20);  
@@ -94,8 +130,23 @@ public class Statistics extends Activity {
 //
 //		
 		Map<Integer, Integer> stats = db.getPieChartStats();
-		String [] numberStrings = {"Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"};
-		int total = 0;
+		//String [] numberStrings = {"Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"};
+
+		String data = "";
+		String colors = "";
+		for (int key : stats.keySet())
+		{
+			data += stats.get(key) + ",";
+			colors += key + ",";
+		}
+		Log.i(LOG_TAG, "data: " + data + " :: colors: " + colors);
+		String html_value = "<html><head><script>function draw(){var canvas = document.getElementById(\"can\");ar ctx = canvas.getContext(\"2d\");boxsize = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight  ctx.canvas.width  = window.innerWidth;ctx.canvas.height = window.innerHeight;var lastend = 0;var datapie = ["+ data +"];var colors = ["+ colors +"];var myTotal = 0;var myColor = [\"485252\", \"697878\", \"9e9a99\", \"af9189\", \"ca806d\", \"dcaa78\", \"f4c190\", \"f6d6a1\", \"f8e5bd\", \"faedcd\", \"bdd179\"];for(var e = 0; e < datapie.length; e++){myTotal += datapie[e];}for (var i = 0; i < datapie.length; i++) {ctx.fillStyle = myColor[colors[i]];ctx.beginPath();ctx.moveTo(canvas.width/2,canvas.height/2);ctx.arc(canvas.width/2,canvas.height/2,canvas.height/2,lastend,lastend+(Math.PI*2*(datapie[i]/myTotal)),false);ctx.lineTo(canvas.width/2,canvas.height/2);ctx.fill();lastend += Math.PI*2*(datapie[i]/myTotal);}}</script></head><body onLoad=\"draw()\"><canvas id=\"can\"></canvas></body></html>";
+		
+		WebView browser = (WebView) findViewById(R.id.wv_chart);
+        browser.getSettings().setJavaScriptEnabled(true);
+        browser.loadData(html_value, "text/html", "UTF-8");
+		
+		/*int total = 0;
 		mSeries.clear();
 
 		for (int key : stats.keySet())
@@ -121,6 +172,7 @@ public class Statistics extends Activity {
 		RelativeLayout layout = (RelativeLayout) findViewById(R.id.rl_chart);
 		layout.removeAllViews();
 		layout.addView(mChartView);
+		*/
 	}
 	public void draw_DotsOfRot()
 	{
@@ -130,7 +182,7 @@ public class Statistics extends Activity {
 	    renderer.setChartTitleTextSize(20);
 	    renderer.setLabelsTextSize(15);
 	    renderer.setLegendTextSize(15);
-	    renderer.setPointSize(1f);
+	    renderer.setPointSize(5F);
 	    renderer.setMargins(new int[] { 20, 30, 15, 20 });
 
 		String[] titles = new String[] { "Display Count vs Ranking" };
@@ -149,7 +201,7 @@ public class Statistics extends Activity {
 	      ((XYSeriesRenderer) renderer.getSeriesRendererAt(i)).setFillPoints(true);
 	    }
 
-		Map<Integer, Integer> values = db.getScatterChartStats();	    
+		ArrayList<ScatterChartCoords> values = db.getScatterChartStats();	    
 	    XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
 	    
 	    int length = titles.length;
@@ -157,23 +209,18 @@ public class Statistics extends Activity {
 	    double yMax = 0;
 	    for (int i = 0; i < length; i++) {
 	    	XYSeries series = new XYSeries(titles[i]);
-	    	for (Map.Entry<Integer, Integer> entry : values.entrySet())
+			for (int j = 0; j < values.size(); j++)
 	    	{
-	    		double xVal = (double)entry.getKey();
-	    		double yVal = (double)entry.getValue();
-	    		xMax = xMax <  xVal ? xVal : xMax;
-	    		yMax = yMax <  yVal ? yVal : yMax;
-	    		series.add(xVal, yVal);
+	    		xMax = xMax <  values.get(j).x ? values.get(j).x : xMax;
+	    		yMax = yMax <  values.get(j).y ? values.get(j).y : yMax;
+	    		series.add(values.get(j).x, values.get(j).y);
 	    	}
 	    	dataset.addSeries(series);
 	    	Log.v(LOG_TAG, "series added (" + series.getItemCount() + ")");
 	    }
 	    
 
-//	    setChartSettings(renderer, "Scatter chart", "X", "Y", -10, 30, -10, 51, Color.GRAY,
-//	        Color.LTGRAY);
-	    renderer.setChartTitle("Dots of Rot");
-	    renderer.setXTitle("Next Due");
+	    renderer.setXTitle("Ranking");
 	    renderer.setYTitle("Display Count");
 	    renderer.setXAxisMin(0);
 	    renderer.setXAxisMax(xMax);
@@ -183,47 +230,15 @@ public class Statistics extends Activity {
 	    renderer.setLabelsColor(Color.LTGRAY);
 	    
 		mChartView = ChartFactory.getScatterChartView(this, dataset, renderer);
-		RelativeLayout layout = (RelativeLayout) findViewById(R.id.rl_chart);
-		layout.removeAllViews();
-		layout.addView(mChartView);
+//		RelativeLayout layout = (RelativeLayout) findViewById(R.id.rl_chart);
+	//	layout.removeAllViews();
+		//layout.addView(mChartView);
 		
 		
 		
 //		mRenderer.setPanLimits(new double[] { 00, 600 , 00, 300 });     //xmin,xmax,ymin,ymax  bars/grids limit
 //		mRenderer.setZoomLimits(new double[]{00, 200, 00, 30});     //xmin,xmax,ymin,ymax  zoom limit
-//        String seriesTitle = "Series " + (mDataset.getSeriesCount() + 1);
-//        XYSeries series = new XYSeries(seriesTitle);
-//        ArrayList<String> accuracy = getIntent().getExtras().getStringArrayList("accuracy");
-//        ArrayList<String> time = getIntent().getExtras().getStringArrayList("time");
-//        for (int i = 0; i < time.size(); i++) {
-//            series.add(Double.parseDouble(time.get(i)), Double.parseDouble(accuracy.get(i)));
-//        }
-//        mDataset.addSeries(series);
-//        mCurrentSeries = series;
 //        mRenderer.setYLabelsAlign(Paint.Align.RIGHT);
-//        XYSeriesRenderer renderer = new XYSeriesRenderer();
-//        mRenderer.addSeriesRenderer(renderer);
-//        mRenderer.setPointSize(15f);
-//        mCurrentRenderer = renderer;
-//
-//        if(mChartView== null){
-//
-//            //ADD VALUE OF X,Y HERE to the series
-//            mCurrentSeries.add(x,y);
-//
-//            if (mChartView != null) {
-//                mChartView.repaint();
-//            }
-//            mChartView = ChartFactory.getScatterChartView(ShowGraph.this, mDataset, mRenderer);
-//            mChartView.addPanListener(new PanListener() {
-//                public void panApplied() {
-//                    System.out.println("New X range=[" + mRenderer.getXAxisMin() + ", " + mRenderer.getXAxisMax()
-//                        + "], Y range=[" + mRenderer.getYAxisMax() + ", " + mRenderer.getYAxisMax() + "]");
-//                }
-//            });
-//            layout.addView(mChartView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
-//
-//        }    
 	}
 
 	
