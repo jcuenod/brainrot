@@ -9,8 +9,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.WebView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.view.View;
 
 @SuppressLint("SetJavaScriptEnabled")
 public class Statistics extends Activity {
@@ -33,7 +35,7 @@ public class Statistics extends Activity {
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spnGraphPicker.setAdapter(adapter);
 			
-		/*spnGraphPicker.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+		spnGraphPicker.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
 		    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 		        //Object item = parent.getItemAtPosition(pos);
@@ -49,7 +51,7 @@ public class Statistics extends Activity {
 		    }
 		    public void onNothingSelected(AdapterView<?> parent) {
 		    }
-		});*/
+		});
 		
 		db = new DBHelper(getApplicationContext());
 		this.draw_rottenPie();
@@ -86,8 +88,14 @@ public class Statistics extends Activity {
         browser.loadData(content, "text/html", "UTF-8");
 	}
 	
-//	public void draw_DotsOfRot()
-//	{
+	public void draw_DotsOfRot()
+	{
+		String content = assetToString("www/bubblechart.html");
+		
+		WebView browser = (WebView) findViewById(R.id.wv_chart);
+        browser.getSettings().setJavaScriptEnabled(true);
+        browser.loadData(content, "text/html", "UTF-8");
+        
 		//TODO: support packs here (each pack needs a title and the db will need to return info grouped by pack somehow...) c.f. later todo for more info
 		/*XYMultipleSeriesRenderer renderer = new XYMultipleSeriesRenderer();
 		renderer.setAxisTitleTextSize(16);
@@ -151,7 +159,7 @@ public class Statistics extends Activity {
 //		mRenderer.setPanLimits(new double[] { 00, 600 , 00, 300 });     //xmin,xmax,ymin,ymax  bars/grids limit
 //		mRenderer.setZoomLimits(new double[]{00, 200, 00, 30});     //xmin,xmax,ymin,ymax  zoom limit
 //        mRenderer.setYLabelsAlign(Paint.Align.RIGHT);
-//	}
+	}
 
 	
 	/*
