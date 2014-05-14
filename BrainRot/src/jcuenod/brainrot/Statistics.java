@@ -166,44 +166,9 @@ public class Statistics extends Activity {
 	
 	@Override  
 	protected void onResume() {  
+    	mWebView.loadUrl("file:///android_asset/graphs/graph1.html");
 		super.onResume();  
-		if (mChartView == null) {  
-			LinearLayout layout = (LinearLayout) findViewById(R.id.chart);  
-			mChartView = ChartFactory.getPieChartView(this, mSeries, mRenderer);  
-			mRenderer.setClickEnabled(true);  
-			mRenderer.setSelectableBuffer(10);  
-
-			mChartView.setOnClickListener(new View.OnClickListener() {  
-				@Override  
-				public void onClick(View v) {  
-					SeriesSelection seriesSelection = mChartView.getCurrentSeriesAndPoint();  
-
-					if (seriesSelection == null) {  
-						Toast.makeText(AChartEnginePieChartActivity.this,"No chart element was clicked",Toast.LENGTH_SHORT).show();  
-					} else {  
-						Toast.makeText(AChartEnginePieChartActivity.this,"Chart element data point index "+ (seriesSelection.getPointIndex()+1) + " was clicked" + " point value="+ seriesSelection.getValue(), Toast.LENGTH_SHORT).show();  
-					}  
-				}  
-			});  
-
-			mChartView.setOnLongClickListener(new View.OnLongClickListener() {  
-				@Override  
-				public boolean onLongClick(View v) {  
-					SeriesSelection seriesSelection = mChartView.getCurrentSeriesAndPoint();  
-					if (seriesSelection == null) {  
-						Toast.makeText(AChartEnginePieChartActivity.this,"No chart element was long pressed", Toast.LENGTH_SHORT);  
-						return false;   
-					} else {  
-						Toast.makeText(AChartEnginePieChartActivity.this,"Chart element data point index "+ seriesSelection.getPointIndex()+ " was long pressed",Toast.LENGTH_SHORT);  
-						return true;         
-					}  
-				}  
-			});  
-			layout.addView(mChartView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));  
-		}  
-		else {  
-			mChartView.repaint();  
-		}  
+		  
 	}  
 	*/
 	private String assetToString(String assetURI)
