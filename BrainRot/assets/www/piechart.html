@@ -1,44 +1,44 @@
 <html>
 	<head>
-	<script>
-		function draw()
-		{
-			var piecanvas_element = document.getElementById("piecanvas_element");
-			var legend_element = document.getElementById("legend");
-			
-			var legendhtml = "";
-			
-			var ctx = piecanvas_element.getContext("2d");
-			boxsize = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight;
-			boxsize *= 0.8;
-	  		ctx.canvas.width  = boxsize;
-			ctx.canvas.height = boxsize;
-			var lastend = 0;
-			var datapie = [%VAR_DATA%];
+		<script>
+			var pieData = [%VAR_DATA%];
 			var columns = [%VAR_COLUMNS%];
-			var columnnames = [%VAR_COLUMNNAMES%];
-			var myTotal = 0;
-			var myColor = ["bdd179", "faedcd", "f8e5bd", "f6d6a1", "f4c190", "dcaa78", "d69c62", "ca806d", "af9189", "9e9a99", "697878", "485252"];
-		
-			for(var e = 0; e < datapie.length; e++)
+			var columnNames = [%VAR_COLUMNNAMES%];
+			var colorArray = ["bdd179", "faedcd", "f8e5bd", "f6d6a1", "f4c190", "dcaa78", "d69c62", "ca806d", "af9189", "9e9a99", "697878", "485252"];
+			
+			function draw()
 			{
-				myTotal += datapie[e];
-			}
-
-			for (var i = 0; i < datapie.length; i++) {
-				ctx.fillStyle = myColor[columns[i]];
-				ctx.beginPath();
-				ctx.moveTo(piecanvas_element.width/2,piecanvas_element.height/2);
-				ctx.arc(piecanvas_element.width/2,piecanvas_element.height/2,piecanvas_element.height/2,lastend,lastend+(Math.PI*2*(datapie[i]/myTotal)),false);
-				ctx.lineTo(piecanvas_element.width/2,piecanvas_element.height/2);
-				ctx.fill();
-				lastend += Math.PI*2*(datapie[i]/myTotal);
+				var piecanvas_element = document.getElementById("piecanvas_element");
+				var legend_element = document.getElementById("legend_element");
 				
-				var piepercent = Math.round(datapie[i]/myTotal * 100);
-				legendhtml += "<tr><td style='background-color: #" + myColor[columns[i]] + "'>" + piepercent + "%</td><td>" + columnnames[i] + (piepercent == 0 ? " (" + datapie[i] + " cards)" : "") + "</td></tr>";
+				var legendhtml = "";
+			
+				var context = piecanvas_element.getContext("2d");
+				var boxsize = (window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight) * 0.8;
+		  		context.canvas.width  = boxsize;
+				context.canvas.height = boxsize;
+				var lastEnd = 0;
+				var dataTotal = 0;
+		
+				for(var e = 0; e < pieData.length; e++)
+				{
+					dataTotal += pieData[e];
+				}
+
+				for (var i = 0; i < pieData.length; i++) {
+					context.fillStyle = colorArray[columns[i]];
+					context.beginPath();
+					context.moveTo(piecanvas_element.width/2, piecanvas_element.height/2);
+					context.arc(piecanvas_element.width/2, piecanvas_element.height/2, piecanvas_element.height/2, lastEnd, lastEnd + (Math.PI*2*(pieData[i]/dataTotal)), false);
+					context.lineTo(piecanvas_element.width/2, piecanvas_element.height/2);
+					context.fill();
+					lastEnd += Math.PI * 2 * (pieData[i] / dataTotal);
+				
+					var piePercent = Math.round(pieData[i]/dataTotal * 100);
+					legendhtml += "<tr><td style='background-color: #" + colorArray[columns[i]] + "'>" + piePercent + "%</td><td>" + columnNames[i] + (piePercent <= 3 ? " (" + pieData[i] + " card" + (pieData[i] > 1 ? "s" : "") + ")" : "") + "</td></tr>";
+				}
+				legend_element.innerHTML = "<table>" + legendhtml + "</table>";
 			}
-			legend_element.innerHTML = "<table>" + legendhtml + "</table>";
-		}
 		</script>
 		<style>
 			body {
@@ -50,7 +50,7 @@
 				margin: 5%;
 				padding: 0;
 			}
-			#legend {
+			#legend_element {
 				text-align: left;
 				font-size: 1.4em;
 				margin: 0 auto;
@@ -70,6 +70,6 @@
 	</head>
 	<body onLoad="draw()">
 		<canvas id="piecanvas_element"></canvas>
-		<table id="legend"></table>
+		<table id="legend_element"></table>
 	</body>
 </html>

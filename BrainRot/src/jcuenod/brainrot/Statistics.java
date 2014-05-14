@@ -1,6 +1,8 @@
 package jcuenod.brainrot;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import jcuenod.brainrot.R.array;
@@ -66,22 +68,23 @@ public class Statistics extends Activity {
 	
 	private void draw_rottenPie()
 	{
-		Map<Integer, Integer> stats = db.getPieChartStats();
+		ArrayList<PieChartDetails> stats = db.getPieChartStats();
 
+		Map<String, String> variableInjection = new HashMap<String, String>();
 		String data = "";
 		String columns = "";
 		String columnnames = "";
-		for (int key : stats.keySet())
+		for (PieChartDetails tempDetails : stats)
 		{
-			data += stats.get(key) + ",";
-			columns += key + ",";
-			columnnames += "\"" + FlashCard.PIMSLEUR_TIMINGS_STRING[key] + "\",";
+			data += tempDetails.getCount() + ",";
+			columns += tempDetails.getRanking() + ",";
+			columnnames += "\"" + FlashCard.PIMSLEUR_TIMINGS_STRING[tempDetails.getRanking()] + "\",";
 		}
+		variableInjection.put("%VAR_DATA%", data);
+		variableInjection.put("%VAR_COLUMNS%", columns);
+		variableInjection.put("%VAR_COLUMNNAMES%", columnnames);
 	
-		String content = assetToString("www/piechart.html")
-			.replaceAll("%VAR_DATA%", data)
-			.replaceAll("%VAR_COLUMNS%", columns)
-			.replaceAll("%VAR_COLUMNNAMES%", columnnames);
+		String content = assetToString("www/piechart.html", variableInjection);
 		
 		WebView browser = (WebView) findViewById(R.id.wv_chart);
         browser.getSettings().setJavaScriptEnabled(true);
@@ -90,89 +93,36 @@ public class Statistics extends Activity {
 	
 	public void draw_DotsOfRot()
 	{
-		String content = assetToString("www/bubblechart.html");
+		//TODO: Support packs here (each pack needs a title and the db will need to return info grouped by pack somehow...) c.f. later todo for more info
+		//TODO: Add axis labels (for position and field)
+
+		ArrayList<BubbleChartDetails> values = db.getScatterChartStats();
+		
+		String data = "";
+		for (BubbleChartDetails tempDetails : values)
+		{
+			data += "{x:" + tempDetails.getRanking() + ", y:" + tempDetails.getDisplayCount() + ", z:" + tempDetails.getCounter() + "}, ";
+		}
+
+		Map<String, String> variableInjection = new HashMap<String, String>();
+		variableInjection.put("%VAR_DATA%", data);
+		
+		String content = assetToString("www/bubblechart.html", variableInjection);
+		
 		
 		WebView browser = (WebView) findViewById(R.id.wv_chart);
         browser.getSettings().setJavaScriptEnabled(true);
         browser.loadData(content, "text/html", "UTF-8");
-        
-		//TODO: support packs here (each pack needs a title and the db will need to return info grouped by pack somehow...) c.f. later todo for more info
-		/*XYMultipleSeriesRenderer renderer = new XYMultipleSeriesRenderer();
-		renderer.setAxisTitleTextSize(16);
-	    renderer.setChartTitleTextSize(20);
-	    renderer.setLabelsTextSize(15);
-	    renderer.setLegendTextSize(15);
-	    renderer.setPointSize(5F);
-	    renderer.setMargins(new int[] { 20, 30, 15, 20 });
-
-		String[] titles = new String[] { "Display Count vs Ranking" };
-		
-	    XYSeriesRenderer r = new XYSeriesRenderer();
-	    for (int i = 0; i < titles.length; i++)
-	    {
-	    	r.setColor(COLORS[i % COLORS.length]);
-	    	r.setPointStyle(PointStyle.CIRCLE);
-	    	renderer.addSeriesRenderer(r);
-	    }
-			    
-	    renderer.setXLabels(10);
-	    renderer.setYLabels(10);
-	    for (int i = 0; i < renderer.getSeriesRendererCount(); i++) {
-	      ((XYSeriesRenderer) renderer.getSeriesRendererAt(i)).setFillPoints(true);
-	    }
-
-		ArrayList<ScatterChartCoords> values = db.getScatterChartStats();	    
-	    XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
-	    
-	    int length = titles.length;
-	    double xMax = 0;
-	    double yMax = 0;
-	    for (int i = 0; i < length; i++) {
-	    	XYSeries series = new XYSeries(titles[i]);
-			for (int j = 0; j < values.size(); j++)
-	    	{
-	    		xMax = xMax <  values.get(j).x ? values.get(j).x : xMax;
-	    		yMax = yMax <  values.get(j).y ? values.get(j).y : yMax;
-	    		series.add(values.get(j).x, values.get(j).y);
-	    	}
-	    	dataset.addSeries(series);
-	    	Log.v(LOG_TAG, "series added (" + series.getItemCount() + ")");
-	    }
-	    
-
-	    renderer.setXTitle("Ranking");
-	    renderer.setYTitle("Display Count");
-	    renderer.setXAxisMin(0);
-	    renderer.setXAxisMax(xMax);
-	    renderer.setYAxisMin(0);
-	    renderer.setYAxisMax(yMax + 1);
-	    renderer.setAxesColor(Color.GRAY);
-	    renderer.setLabelsColor(Color.LTGRAY);
-	    
-		mChartView = ChartFactory.getScatterChartView(this, dataset, renderer);*/
-//		RelativeLayout layout = (RelativeLayout) findViewById(R.id.rl_chart);
-	//	layout.removeAllViews();
-		//layout.addView(mChartView);
-		
-		
-		
-//		mRenderer.setPanLimits(new double[] { 00, 600 , 00, 300 });     //xmin,xmax,ymin,ymax  bars/grids limit
-//		mRenderer.setZoomLimits(new double[]{00, 200, 00, 30});     //xmin,xmax,ymin,ymax  zoom limit
-//        mRenderer.setYLabelsAlign(Paint.Align.RIGHT);
 	}
 
+//	@Override  
+//	protected void onResume() {  
+//    	mWebView.loadUrl("file:///android_asset/graphs/graph1.html");
+//		super.onResume();  
+//		  
+//	}
 	
-	/*
-	
-	@Override  
-	protected void onResume() {  
-    	mWebView.loadUrl("file:///android_asset/graphs/graph1.html");
-		super.onResume();  
-		  
-	}  
-	*/
-	
-	private String assetToString(String assetURI)
+	private String assetToString(String assetURI, Map<String, String> variableSubstitutions)
 	{
 		//TODO: does not support comments (double backslash), apparently... (probably because the string comes through as a single line)
 		try {
@@ -182,7 +132,13 @@ public class Statistics extends Activity {
 	        byte[] buffer = new byte[size];
 	        input.read(buffer);
 	        input.close();
-	        return new String(buffer);
+	        String retval = new String(buffer);
+	        
+	        for (String key : variableSubstitutions.keySet())
+	        {
+	        	retval = retval.replaceAll(key, variableSubstitutions.get(key));
+	        }
+	        return retval;
 		}
 		catch (Exception e)
 		{

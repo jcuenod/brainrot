@@ -475,7 +475,7 @@ public class DBHelper extends SQLiteOpenHelper {
     	return c.getCount();
     }
     
-    public Map<Integer, Integer> getPieChartStats()
+    public ArrayList<PieChartDetails> getPieChartStats()
     {
     	SQLiteDatabase db = getReadableDatabase();
 
@@ -494,43 +494,49 @@ public class DBHelper extends SQLiteOpenHelper {
     	    );
     	//Log.w(LOG_TAG, msg)
     	c.moveToFirst();
-    	Map<Integer, Integer> ret = new TreeMap<Integer, Integer>();
+    	ArrayList<PieChartDetails> ret = new ArrayList<PieChartDetails>();
     	while (!c.isAfterLast())
     	{
-    		ret.put(c.getInt(c.getColumnIndexOrThrow(COL_RANKING)), c.getInt(c.getColumnIndexOrThrow("counter")));
+    		ret.add(new PieChartDetails(
+    			c.getInt(c.getColumnIndexOrThrow(COL_RANKING)),
+    			c.getInt(c.getColumnIndexOrThrow("counter"))
+    		));
     		c.moveToNext();
     	}
     	return ret;
     }
-    public ArrayList<ScatterChartCoords> getScatterChartStats()
+    public ArrayList<BubbleChartDetails> getScatterChartStats()
     {
     	SQLiteDatabase db = getReadableDatabase();
 
     	// you will actually use after this query.
-    	String[] projection = { COL_RANKING, COL_DISPLAY_COUNT };
+    	String[] projection = { COL_RANKING, COL_DISPLAY_COUNT, "COUNT(*) as counter" };
     	// Define 'where' part of query.
     	String selection = COL_RANKING + " != ? ";
     	// Specify arguments in placeholder order.
     	String[] selectionArgs = { "0" };
+    	String groupby = COL_RANKING + ", " + COL_DISPLAY_COUNT;
     	
     	Cursor c = db.query(
     	    TBL_CARDS, // The table to query
     	    projection, // The columns to return
     	    selection,
     	    selectionArgs,
-    	    null,
+    	    groupby,
     	    null,
     	    null
     	    );
     	//Log.w(LOG_TAG, msg)
     	c.moveToFirst();
-    	ArrayList<ScatterChartCoords> ret = new ArrayList<ScatterChartCoords>();
+    	//ArrayList<ScatterChartCoords> ret = new ArrayList<ScatterChartCoords>();
+    	ArrayList<BubbleChartDetails> ret = new ArrayList<BubbleChartDetails>();
     	while (!c.isAfterLast())
     	{
-    		ScatterChartCoords cxy = new ScatterChartCoords();
-    		cxy.x = (double) c.getInt(c.getColumnIndexOrThrow(COL_RANKING));
-    		cxy.y = (double) c.getInt(c.getColumnIndexOrThrow(COL_DISPLAY_COUNT));
-    		ret.add(cxy);
+    		ret.add(new BubbleChartDetails(
+    			c.getInt(c.getColumnIndexOrThrow(COL_RANKING)),
+    			c.getInt(c.getColumnIndexOrThrow(COL_DISPLAY_COUNT)),
+    			c.getInt(c.getColumnIndexOrThrow("counter"))
+    		));
     		c.moveToNext();
     	}
     	return ret;

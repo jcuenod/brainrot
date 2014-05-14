@@ -1,60 +1,61 @@
 <html>
 	<head>
 		<script>
-			var data = [ {x:1,y:3,z:3}, {x:1,y:1,z:1}, {x:2,y:2,z:3}, 
-				{x:3,y:3,z:7}, {x:4,y:7,z:3}, {x:5,y:6,z:5}, 
-				{x:6,y:5,z:3}, {x:4,y:9,z:1}, {x:2,y:8,z:1}, 
-				{x:1.5,y:1,z:13}, {x:4,y:6,z:15}, {x:5,y:9,z:7}, 
-				{x:1,y:8,z:3}, {x:8,y:7,z:1}, {x:9,y:9,z:13}, 
-				{x:10,y:3,z:3}, {x:9,y:1,z:3} ];
-		
+			var data = [%VAR_DATA%];
+			var colorArray = ["bdd179", "faedcd", "f8e5bd", "f6d6a1", "f4c190", "dcaa78", "d69c62", "ca806d", "af9189", "9e9a99", "697878", "485252"];
 			function draw() 
 			{
-				var canvas = document.getElementById( "myCanvas" );
-				var context = canvas.getContext( "2d" );
-
-		        	context.fillStyle = "#FFF";
-		        	context.fillRect( 0,0, canvas.width, canvas.height );
-
-				var xIncrement = canvas.width / 10;
-				var yIncrement = canvas.height / 10;
+				var canvas = document.getElementById("bubblecanvas_element");
+				var context = canvas.getContext("2d");
+				
+		  		context.canvas.width  = window.innerWidth;
+				context.canvas.height = window.innerHeight;
+			
+		        	var maxX = data[0].x;
+				var maxY = data[0].y;
+				var minX = data[0].x;
+				var minY = data[0].y;
+				for (d in data)
+				{
+					maxX = data[d].x > maxX ? data[d].x : maxX;
+					minX = data[d].x < minX ? data[d].x : minX;
+					maxY = data[d].y > maxY ? data[d].y : maxY;
+					minY = data[d].y < minY ? data[d].y : minY;
+				}
+				var xIncrement = canvas.width / (maxX - minX);
+				var yIncrement = canvas.height / (maxY - minY);
 			
 				context.strokeStyle = "#DDDDDD";
+				context.lineCap = "round";
 				context.lineWidth = 1;
 				context.strokeRect( 0,0, canvas.width, canvas.height );
 				
 				context.beginPath();
-				for ( var xPosition = 0; xPosition < canvas.width; xPosition += xIncrement )
+				for (var xPosition = 0; xPosition < canvas.width; xPosition += xIncrement)
 				{
-					context.moveTo( xPosition, 0 );
-					context.lineTo( xPosition, canvas.height );
+					context.moveTo(xPosition, 0);
+					context.lineTo(xPosition, canvas.height);
 				}
 			
-				for ( var yPosition = 0; yPosition < canvas.height; yPosition += yIncrement )
+				for (var yPosition = 0; yPosition < canvas.height; yPosition += yIncrement)
 				{
 					context.moveTo( 0, yPosition );
 					context.lineTo( canvas.width, yPosition );
 				}
-				
 				context.stroke();
 				
-				context.strokeStyle = "#000000";
-				context.lineWidth = 1;
-				context.fillStyle = "rgba(255,0,0,0.25)";
-				
+				context.globalAlpha = 0.25;
 				for ( var i = 0; i < data.length; i++ )
 				{
+					context.fillStyle = colorArray[data[i].x];
 					context.beginPath();
-					context.arc( data[i].x*xIncrement, canvas.height-(data[i].y * yIncrement), data[i].z, 0, Math.PI * 2, false );
+					context.arc((data[i].x - minX) * xIncrement, canvas.height - ((data[i].y - minY) * yIncrement), data[i].z, 0, Math.PI * 2, false);
 					context.fill();
-					context.stroke();
 				}
 			}
 		</script>
-	        <style>
-		</style>
 	</head>
 	<body onLoad="draw()">
-	    <canvas id="myCanvas" width="900" height="200" ></canvas>
+	    <canvas id="bubblecanvas_element" width="900" height="200" ></canvas>
 	</body>
 </html>
