@@ -3,15 +3,20 @@
 	<script>
 		function draw()
 		{
-			var canvas = document.getElementById("can");
-			var ctx = canvas.getContext("2d");
+			var piecanvas_element = document.getElementById("piecanvas_element");
+			var legend_element = document.getElementById("legend");
+			
+			var legendhtml = "";
+			
+			var ctx = piecanvas_element.getContext("2d");
 			boxsize = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight;
 			boxsize *= 0.8;
 	  		ctx.canvas.width  = boxsize;
 			ctx.canvas.height = boxsize;
 			var lastend = 0;
 			var datapie = [%VAR_DATA%];
-			var colors = [%VAR_COLORS%];
+			var columns = [%VAR_COLUMNS%];
+			var columnnames = [%VAR_COLUMNNAMES%];
 			var myTotal = 0;
 			var myColor = ["bdd179", "faedcd", "f8e5bd", "f6d6a1", "f4c190", "dcaa78", "d69c62", "ca806d", "af9189", "9e9a99", "697878", "485252"];
 		
@@ -21,31 +26,50 @@
 			}
 
 			for (var i = 0; i < datapie.length; i++) {
-				ctx.fillStyle = myColor[colors[i]];
+				ctx.fillStyle = myColor[columns[i]];
 				ctx.beginPath();
-				ctx.moveTo(canvas.width/2,canvas.height/2);
-				ctx.arc(canvas.width/2,canvas.height/2,canvas.height/2,lastend,lastend+(Math.PI*2*(datapie[i]/myTotal)),false);
-				ctx.lineTo(canvas.width/2,canvas.height/2);
+				ctx.moveTo(piecanvas_element.width/2,piecanvas_element.height/2);
+				ctx.arc(piecanvas_element.width/2,piecanvas_element.height/2,piecanvas_element.height/2,lastend,lastend+(Math.PI*2*(datapie[i]/myTotal)),false);
+				ctx.lineTo(piecanvas_element.width/2,piecanvas_element.height/2);
 				ctx.fill();
 				lastend += Math.PI*2*(datapie[i]/myTotal);
+				
+				var piepercent = Math.round(datapie[i]/myTotal * 100);
+				legendhtml += "<tr><td style='background-color: #" + myColor[columns[i]] + "'>" + piepercent + "%</td><td>" + columnnames[i] + (piepercent == 0 ? " (" + datapie[i] + " cards)" : "") + "</td></tr>";
 			}
+			legend_element.innerHTML = "<table>" + legendhtml + "</table>";
 		}
-
 		</script>
 		<style>
+			body {
+				margin: 0;
+				padding: 0;
+				text-align: center;
+			}
 			canvas {
 				margin: 5%;
 				padding: 0;
 			}
-			center {
-				margin: 0;
-				padding: 0;
+			#legend {
+				text-align: left;
+				font-size: 1.4em;
+				margin: 0 auto;
+				padding: 0.1em;
+				border: 0;
+			}
+			td:first-child {
+				display: inline-block;
+				border-radius: 5px;
+				padding: 1px 3px;
+				min-width: 1.4em;
+				font-size: 0.5em;
+				color: #efe;
+				text-align: center;
 			}
 		</style>
 	</head>
 	<body onLoad="draw()">
-		<center>
-			<canvas id="can"></canvas>
-		</center>
+		<canvas id="piecanvas_element"></canvas>
+		<table id="legend"></table>
 	</body>
 </html>

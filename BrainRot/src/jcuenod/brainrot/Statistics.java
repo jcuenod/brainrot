@@ -2,6 +2,8 @@ package jcuenod.brainrot;
 
 import java.io.InputStream;
 import java.util.Map;
+
+import jcuenod.brainrot.R.array;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
@@ -62,23 +64,22 @@ public class Statistics extends Activity {
 	
 	private void draw_rottenPie()
 	{
-//		TODO: Add Legend
-//		String [] numberStrings = {"Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"};
-
 		Map<Integer, Integer> stats = db.getPieChartStats();
 
 		String data = "";
-		String colors = "";
+		String columns = "";
+		String columnnames = "";
 		for (int key : stats.keySet())
 		{
 			data += stats.get(key) + ",";
-			colors += key + ",";
+			columns += key + ",";
+			columnnames += "\"" + FlashCard.PIMSLEUR_TIMINGS_STRING[key] + "\",";
 		}
-		Log.i(LOG_TAG, "data: " + data + " :: colors: " + colors);
 	
 		String content = assetToString("www/piechart.html")
 			.replaceAll("%VAR_DATA%", data)
-			.replaceAll("%VAR_COLORS%", colors);
+			.replaceAll("%VAR_COLUMNS%", columns)
+			.replaceAll("%VAR_COLUMNNAMES%", columnnames);
 		
 		WebView browser = (WebView) findViewById(R.id.wv_chart);
         browser.getSettings().setJavaScriptEnabled(true);

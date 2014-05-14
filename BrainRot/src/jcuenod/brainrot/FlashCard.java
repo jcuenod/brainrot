@@ -16,18 +16,18 @@ public class FlashCard {
 		2 * 365 * 24 * 60 * 60 * 1000L //2 years
 	};
 	public static String [] PIMSLEUR_TIMINGS_STRING = {
-		"",
-		"5 seconds",
-		"25 seconds",
-		"2 minutes",
-		"10 minutes",
-		"1 hour",
-		"5 hours",
-		"1 day",
-		"5 days",
-		"25 days",
-		"4 months",
-		"2 years",
+		"Never Seen",
+		"5 Seconds",
+		"25 Seconds",
+		"2 Minutes",
+		"10 Minutes",
+		"1 Hour",
+		"5 Hours",
+		"1 Day",
+		"5 Days",
+		"25 Days",
+		"4 Months",
+		"2 Years",
 	};
 	public static final int MAX_RANKING = PIMSLEUR_TIMINGS.length;
 	
