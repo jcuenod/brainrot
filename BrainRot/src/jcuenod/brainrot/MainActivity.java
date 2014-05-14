@@ -231,7 +231,10 @@ public class MainActivity extends Activity {
         		// Create a calendar object that will convert the date and time value in milliseconds to date.
         		Calendar calendar = Calendar.getInstance();
         		calendar.setTimeInMillis(db.getSoonestDueMilliseconds());
-        		Toast.makeText(this, "Next Due Time:\n" + formatter.format(calendar.getTime()), Toast.LENGTH_LONG).show();
+        		String nextDue = formatter.format(calendar.getTime());
+        		calendar = Calendar.getInstance();
+        		calendar.add(Calendar.DATE, 1);
+        		Toast.makeText(this, "Next Due Time:\n" + nextDue + "\nCards in 24 Hours: " + db.getDueInMilliseconds(calendar.getTimeInMillis()), Toast.LENGTH_LONG).show();
         		return true;
         	case R.id.action_learnnew:
         		item.setChecked(!item.isChecked());

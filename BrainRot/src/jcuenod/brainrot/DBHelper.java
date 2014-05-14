@@ -449,6 +449,41 @@ public class DBHelper extends SQLiteOpenHelper {
     		return 0;
     	}
     }
+    public int getDueInMilliseconds(long milliseconds)
+    {
+    	SQLiteDatabase db = getReadableDatabase();
+
+    	// Define a projection that specifies which columns from the database
+    	// you will actually use after this query.
+    	String[] projection = { "COUNT(*) as counter" };
+    	// Define 'where' part of query.
+    	String selection = COL_NEXT_DUE + " != ? AND " + COL_NEXT_DUE + " < ?";
+    	// Specify arguments in placeholder order.
+    	String[] selectionArgs = { "0",  Long.toString(milliseconds)};
+
+    	Cursor c = db.query(
+    	    TBL_CARDS,  // The table to query
+    	    projection,                               // The columns to return
+    	    selection,                                // The columns for the WHERE clause
+    	    selectionArgs,                            // The values for the WHERE clause
+    	    null,                                     // don't group the rows
+    	    null,                                     // don't filter by row groups
+    	    null                                 // The sort order
+    	    );
+    	//Log.w(LOG_TAG, msg)
+    	c.moveToFirst();
+    	Log.v(LOG_TAG, "returned values: " + c.getCount());
+    	if (c.getCount() > 0)
+    	{
+    		int nextDue = c.getInt(c.getColumnIndexOrThrow("counter"));
+        	return nextDue;
+    	}
+    	else
+    	{
+        	Log.v(LOG_TAG, "None due");
+    		return 0;
+    	}
+    }
     public int getOverdueCount()
     {
     	SQLiteDatabase db = getReadableDatabase();
