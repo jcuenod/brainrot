@@ -8,8 +8,8 @@
 				var canvas = document.getElementById("bubblecanvas_element");
 				var context = canvas.getContext("2d");
 				
-		  		context.canvas.width  = window.innerWidth;
-				context.canvas.height = window.innerHeight;
+		  		context.canvas.width  = window.innerWidth * 0.92;
+				context.canvas.height = window.innerHeight * 0.92;
 			
 		        	var maxX = data[0].x;
 				var maxY = data[0].y;
@@ -54,8 +54,13 @@
 				}
 			}
 		</script>
+		<style>
+			canvas {
+				margin: 1.5%;
+			}
+		</style>
 	</head>
 	<body onLoad="draw()">
-	    <canvas id="bubblecanvas_element" width="900" height="200" ></canvas>
+	    <canvas id="bubblecanvas_element"></canvas>
 	</body>
 </html>
