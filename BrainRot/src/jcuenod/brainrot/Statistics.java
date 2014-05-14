@@ -171,8 +171,10 @@ public class Statistics extends Activity {
 		  
 	}  
 	*/
+	
 	private String assetToString(String assetURI)
 	{
+		//TODO: does not support comments (double backslash), apparently... (probably because the string comes through as a single line)
 		try {
 			InputStream input = getAssets().open(assetURI);
 	        // myData.txt can't be more than 2 gigs.
