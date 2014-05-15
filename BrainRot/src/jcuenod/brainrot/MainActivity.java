@@ -158,15 +158,57 @@ public class MainActivity extends Activity {
 
 	public void showCardMenu() {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		String [] menuoptions = {"Card Stats", "Set Ranking", "Edit Card", "Delete Card"};
-		Response [] r = new Response[4];
+		String [] menuoptions = {"Card Stats", "Postpone", "Set Ranking", "Edit Card", "Delete Card"};
+		Response [] r = new Response[5];
 		r[0] = new Response() {
 			public void respond(int which) //Show Stats
 			{
-				Toast.makeText(getApplicationContext(), "Individual card stats not yet implemented", Toast.LENGTH_SHORT).show();
+		        DateFormat formatter = SimpleDateFormat.getDateTimeInstance();
+				Toast.makeText(getApplicationContext(),
+						"Details for Current Card:\n--\n" +
+						"Displayed: " + currentCard.getDisplayCount() + " times\n" +
+						"Rank: " + currentCard.getRanking() + "/" + FlashCard.PIMSLEUR_TIMINGS.length + "\n" +
+						"Last Seen: " + formatter.format(currentCard.getLastSeen()) + "\n" +
+						"Next Due:" + formatter.format(currentCard.getNextDue())
+						, Toast.LENGTH_LONG).show();
 			}
 		};
 		r[1] = new Response() {
+			public void respond(int which) //Postpone
+			{
+				String [] postponements = {"1 Hour", "1 Day", "5 Days", "10 Days"};  
+        		Response [] r = new Response[1];
+        		r[0] = new Response() {
+	   				public void respond(int which)
+	   				{
+	   					Log.v(LOG_TAG, "postponement selected: which=" + String.valueOf(which));
+	   					Calendar c = Calendar.getInstance();
+	   					switch (which)
+	   					{
+	   					case 0: //1 hour
+	   						c.add(Calendar.HOUR, 1);
+	   						break;
+	   					case 1: //1 day
+	   						c.add(Calendar.DAY_OF_YEAR, 1);
+	   						break;
+	   					case 2: //5 days
+	   						c.add(Calendar.DAY_OF_YEAR, 5);
+	   						break;
+	   					case 3: //10 days
+	   						c.add(Calendar.DAY_OF_YEAR, 10);
+	   						break;
+	   					}
+	   					currentCard.setNextDue(c.getTimeInMillis());
+				        db.storeCard(currentCard);
+				        DateFormat formatter = SimpleDateFormat.getDateTimeInstance();
+	   					Toast.makeText(getApplicationContext(), "Postponed to " + formatter.format(currentCard.getNextDue()), Toast.LENGTH_LONG).show();
+	   					showCard();
+	   				}
+	   			};
+	   			build_dialog("Postpone By", postponements, r);
+			}
+		};
+		r[2] = new Response() {
 				public void respond(int which) //Set Ranking
 				{
 					String [] timings = new String[FlashCard.PIMSLEUR_TIMINGS.length -1];  
@@ -187,7 +229,7 @@ public class MainActivity extends Activity {
     	   			build_dialog("Set Rank", timings, r);
 				}
 			};
-		r[2] = new Response() {
+		r[3] = new Response() {
 				public void respond(int which) //Edit Card
 				{
 					String [] details = {currentCard.getSideOne(), currentCard.getSideTwo()};
@@ -237,7 +279,7 @@ public class MainActivity extends Activity {
     	   			build_dialog("Edit Card", details, r, true);
 				}
 			};
-		r[3] = new Response() {
+		r[4] = new Response() {
 				public void respond(int which) //Delete Card
 				{
 					AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
