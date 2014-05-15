@@ -26,11 +26,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -51,6 +53,9 @@ public class MainActivity extends Activity {
 	protected DBHelper db;
 	protected boolean learnNew;
 	private Typeface unicodeface;
+	
+	private String editCard;
+	private int sideToEdit;
 
 	private ArrayList<FlashCard> cardHistory;
 	private int previousCardDialogPagination = 0;
@@ -185,7 +190,51 @@ public class MainActivity extends Activity {
 		r[2] = new Response() {
 				public void respond(int which) //Edit Card
 				{
-					Toast.makeText(getApplicationContext(), "Edit Card not yet implemented", Toast.LENGTH_SHORT).show();
+					String [] details = {currentCard.getSideOne(), currentCard.getSideTwo()};
+            		Response [] r = new Response[1];
+            		r[0] = new Response() {
+    	   				public void respond(int which)
+    	   				{
+    	   					sideToEdit = which;
+    	   					Log.v(LOG_TAG, "card side to edit: which=" + String.valueOf(which));
+    	   					AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+    						builder.setTitle("Edit Side " + (which == 0 ? "One" : "Two"));
+
+    						// Set up the input
+    						final EditText input = new EditText(MainActivity.this);
+    						// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+    						input.setInputType(InputType.TYPE_CLASS_TEXT);
+    						builder.setView(input);
+    						builder.setMessage((which == 0 ? currentCard.getSideOne() : currentCard.getSideTwo()));
+
+    						// Set up the buttons
+    						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() { 
+    						    @Override
+    						    public void onClick(DialogInterface dialog, int which) {
+    						        switch (sideToEdit)
+    						        {
+    						        case 0:
+    						        	currentCard.setSideOne(input.getText().toString());
+    						        	break;
+    						        case 1:
+    						        	currentCard.setSideTwo(input.getText().toString());
+    						        	break;
+    						        }
+    						        db.storeCard(currentCard);
+    						        do_actualDisplay();
+    						    }
+    						});
+    						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+    						    @Override
+    						    public void onClick(DialogInterface dialog, int which) {
+    						        dialog.cancel();
+    						    }
+    						});
+
+    						builder.show();
+    	   				}
+    	   			};
+    	   			build_dialog("Edit Card", details, r, true);
 				}
 			};
 		r[3] = new Response() {
